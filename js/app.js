@@ -22,11 +22,10 @@ function formatearMonedaCompacta(valor) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ==========================================
-  // ESTADOS Y PERSISTENCIA DE LA APLICACIÓN
-  // ==========================================
+  // Estados y persistencia de la sesión
   let activeTeamId = localStorage.getItem("fc26_active_team_id") || null;
   let currentOpenTeamId = sessionStorage.getItem("fc26_open_team_id") || null;
+  let filtroPosicionActivo = null;
 
   // ==========================================
   // ELEMENTOS DEL DOM - GENERALES Y NAVEGACIÓN
@@ -48,6 +47,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const teamViewName = document.getElementById("team-view-name");
   const teamHeaderSquadCount = document.getElementById("team-header-squad-count");
   const teamHeaderTransfersCount = document.getElementById("team-header-transfers-count");
+  const posicionesResumenContainer = document.getElementById("posiciones-resumen-container");
+  const btnVerTodos = document.getElementById("btn-ver-todos");
 
   // Pestañas (Tabs)
   const tabButtons = document.querySelectorAll(".tab-btn");
@@ -118,6 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     currentOpenTeamId = id;
     sessionStorage.setItem("fc26_open_team_id", id);
+    filtroPosicionActivo = null;
 
     // Configurar contenidos de cabecera
     teamViewName.textContent = equipo.nombre;
@@ -344,11 +346,65 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const jugadores = equipo.plantilla || [];
 
-    if (jugadores.length === 0) {
+    // --- CÁLCULO DINÁMICO DE CONTEO POR POSICIÓN ---
+    const posicionesFifa = ["GK", "CB", "LB", "RB", "LWB", "RWB", "CDM", "CM", "CAM", "LM", "RM", "LW", "RW", "ST", "CF"];
+    const counts = {};
+    posicionesFifa.forEach(pos => counts[pos] = 0);
+
+    jugadores.forEach(jugador => {
+      if (Array.isArray(jugador.posiciones)) {
+        jugador.posiciones.forEach(pos => {
+          if (counts[pos] !== undefined) {
+            counts[pos]++;
+          }
+        });
+      }
+    });
+
+    // Renderizar los badges de posiciones
+    posicionesResumenContainer.innerHTML = "";
+    posicionesFifa.forEach(pos => {
+      const count = counts[pos];
+      const esActivo = pos === filtroPosicionActivo;
+
+      const cardBadge = document.createElement("div");
+      cardBadge.className = `pos-summary-card ${esActivo ? "active" : ""}`;
+      cardBadge.innerHTML = `${pos} <span class="badge-count">${count}</span>`;
+
+      cardBadge.addEventListener("click", () => {
+        if (filtroPosicionActivo === pos) {
+          filtroPosicionActivo = null;
+        } else {
+          filtroPosicionActivo = pos;
+        }
+        renderPlantilla();
+      });
+
+      posicionesResumenContainer.appendChild(cardBadge);
+    });
+
+    // Controlar visibilidad del botón "Ver todos"
+    if (filtroPosicionActivo) {
+      btnVerTodos.style.display = "inline-flex";
+    } else {
+      btnVerTodos.style.display = "none";
+    }
+
+    // Filtrar jugadores según la posición activa
+    let jugadoresFiltrados = [...jugadores];
+    if (filtroPosicionActivo) {
+      jugadoresFiltrados = jugadores.filter(j => j.posiciones && j.posiciones.includes(filtroPosicionActivo));
+    }
+
+    if (jugadoresFiltrados.length === 0) {
+      const msg = filtroPosicionActivo
+        ? `No hay jugadores registrados en la posición ${filtroPosicionActivo}.`
+        : "No hay jugadores registrados en la plantilla. ¡Agrégalos usando el formulario de la izquierda!";
+      
       plantillaTbody.innerHTML = `
         <tr>
           <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">
-            No hay jugadores registrados en la plantilla. ¡Agrégalos usando el formulario de la izquierda!
+            ${msg}
           </td>
         </tr>
       `;
@@ -356,7 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Ordenar jugadores por dorsal
-    const jugadoresOrdenados = [...jugadores].sort((a, b) => a.dorsal - b.dorsal);
+    const jugadoresOrdenados = jugadoresFiltrados.sort((a, b) => a.dorsal - b.dorsal);
 
     jugadoresOrdenados.forEach(jugador => {
       // Posiciones con badges
@@ -639,6 +695,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Exportar respaldo JSON
   btnExportar.addEventListener("click", () => {
     exportarStorageJSON();
+  });
+
+  // Limpiar filtro de posiciones
+  btnVerTodos.addEventListener("click", () => {
+    filtroPosicionActivo = null;
+    renderPlantilla();
   });
 
   // ==========================================

@@ -193,7 +193,15 @@
           <!-- Lado Derecho: Listado de Jugadores -->
           <div class="squad-list-container">
             <div class="panel-card">
-              <h3>Plantilla Actual</h3>
+              <div class="squad-list-header">
+                <h3>Plantilla Actual</h3>
+                <button id="btn-ver-todos" class="btn btn-secondary" style="display: none; padding: 0.35rem 0.8rem; font-size: 0.8rem;">Ver todos</button>
+              </div>
+              
+              <div id="posiciones-resumen-container" class="positions-summary-container">
+                <!-- Generado dinámicamente -->
+              </div>
+
               <div class="table-responsive">
                 <table class="squad-table">
                   <thead>
