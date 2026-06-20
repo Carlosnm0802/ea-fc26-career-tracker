@@ -2,12 +2,98 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FC 26 Career Tracker</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <h1>FC 26 Career Tracker</h1>
-  <p>Fase 1 en construcción — capa de datos.</p>
+  <div class="app-container">
+    
+    <!-- Cabecera Principal -->
+    <header class="app-header">
+      <div class="brand-section">
+        <h1>FC 26 <span>Career Tracker</span></h1>
+        <p>Tu pizarra personal de Modo Carrera en EA FC 26</p>
+      </div>
+      <div>
+        <button id="btn-exportar" class="btn btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar Respaldo .JSON
+        </button>
+      </div>
+    </header>
+
+    <!-- Pizarra Táctica / Save Activo -->
+    <section id="carrera-activa-container" class="active-save-banner">
+      <div class="tactical-board">
+        <div class="tactical-tag">Táctica de Director Técnico</div>
+        <h2 id="active-team-title">Ninguna carrera seleccionada</h2>
+        <p id="active-team-subtitle">Haz clic en una de tus carreras abajo para empezar a planificar tu plantilla.</p>
+      </div>
+    </section>
+
+    <!-- Formulario para Iniciar Carrera -->
+    <section class="creator-card">
+      <h2>Elige tu próximo reto en el banquillo</h2>
+      <form id="crear-equipo-form" class="form-group-inline">
+        <div class="form-control-wrapper">
+          <input type="text" id="nuevo-equipo-nombre" class="form-control" placeholder="Nombre de tu club (ej. Tottenham Hotspur, Real Madrid...)" required autocomplete="off">
+        </div>
+        <button type="submit" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Iniciar Carrera
+        </button>
+      </form>
+    </section>
+
+    <!-- Listado de Equipos -->
+    <section>
+      <h2 class="section-title">Mis Saves y Proyectos</h2>
+      <div id="equipos-grid" class="equipos-grid">
+        <!-- Generado dinámicamente por JavaScript -->
+      </div>
+    </section>
+
+    <!-- Pie de Página Personalizado (Toque Humano) -->
+    <footer class="app-footer">
+      <p>Diseñado con pasión por Carlos. Todo se guarda localmente en tu navegador. Cero servidores, cero tracking.</p>
+    </footer>
+
+  </div>
+
+  <!-- Modal Personalizado para Renombrar -->
+  <div id="edit-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 class="modal-title">Renombrar Club</h3>
+      <div class="modal-body">
+        <form id="edit-equipo-form">
+          <input type="hidden" id="edit-equipo-id">
+          <input type="text" id="edit-equipo-nombre" class="form-control" placeholder="Nuevo nombre del club" required autocomplete="off">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-cancelar-edit" class="btn btn-secondary">Cancelar</button>
+        <button type="submit" form="edit-equipo-form" class="btn btn-primary">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Personalizado de Confirmación para Eliminar -->
+  <div id="confirm-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 class="modal-title" style="color: var(--danger);">¿Eliminar este Save por completo?</h3>
+      <div class="modal-body">
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Estás a punto de borrar la carrera del <strong id="delete-equipo-nombre" style="color: #fff;"></strong> junto con toda su plantilla, fichajes y notas.</p>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem; font-weight: 500;">Esta acción es irreversible y no se puede deshacer.</p>
+        <input type="hidden" id="delete-equipo-id">
+      </div>
+      <div class="modal-footer">
+        <button id="btn-cancelar-delete" class="btn btn-secondary">Conservar Save</button>
+        <button id="btn-confirmar-delete" class="btn btn-danger">Sí, borrar de todos modos</button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/storage.js"></script>
   <script src="js/app.js"></script>
 </body>

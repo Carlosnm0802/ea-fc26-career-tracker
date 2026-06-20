@@ -1,230 +1,306 @@
 /**
- * EA FC 26 Career Tracker - Script de Pruebas y Consola (Fase 1)
+ * EA FC 26 Career Tracker - Controlador de Interfaz Visual (Fase 2)
  * 
- * Este archivo actúa como puente para probar la capa de datos en la consola
- * del navegador. Expone la función global `probarTracker()` para verificar
- * automáticamente el funcionamiento de storage.js.
+ * Gestiona la interfaz del panel principal de carreras, la selección activa 
+ * de saves con diseño de pizarra táctica y la persistencia de sesión.
  */
 
-console.log("%c⚽ EA FC 26 Career Tracker — Capa de Datos Cargada", "color: #00ff88; font-weight: bold; font-size: 16px;");
-console.log("Ejecuta %cprobarTracker()%c en la consola para iniciar una prueba automatizada del almacenamiento.", "color: #ffaa00; font-weight: bold;", "color: inherit;");
-console.log("Funciones globales disponibles para probar manualmente:");
-console.log("- %cgetEquipos()%c: Obtener todos los equipos", "color: #00bfff;", "");
-console.log("- %ccrearEquipo(nombre)%c: Crear equipo nuevo", "color: #00bfff;", "");
-console.log("- %ceditarNombreEquipo(id, nuevoNombre)%c: Editar nombre de equipo", "color: #00bfff;", "");
-console.log("- %celiminarEquipo(id)%c: Eliminar equipo", "color: #00bfff;", "");
-console.log("- %cagregarJugador(equipoId, jugadorData)%c: Añadir jugador a plantilla", "color: #00bfff;", "");
-console.log("- %ceditarJugador(equipoId, jugadorId, data)%c: Editar jugador", "color: #00bfff;", "");
-console.log("- %celiminarJugador(equipoId, jugadorId)%c: Eliminar jugador", "color: #00bfff;", "");
-console.log("- %cagregarFichajeDeseado(equipoId, fichajeData)%c: Añadir fichaje deseado", "color: #00bfff;", "");
-console.log("- %ceditarFichajeDeseado(equipoId, fichajeId, data)%c: Editar fichaje", "color: #00bfff;", "");
-console.log("- %celiminarFichajeDeseado(equipoId, fichajeId)%c: Eliminar fichaje", "color: #00bfff;", "");
-console.log("- %cactualizarInfoGeneral(equipoId, infoData)%c: Actualizar info general del equipo", "color: #00bfff;", "");
-console.log("- %cexportarStorageJSON()%c: Descargar respaldo JSON", "color: #00bfff;", "");
+document.addEventListener("DOMContentLoaded", () => {
+  // Estado local
+  let activeTeamId = localStorage.getItem("fc26_active_team_id") || null;
 
-/**
- * Ejecuta una prueba automática de todos los métodos CRUD y validaciones.
- */
-function probarTracker() {
-  console.group("%c🧪 INICIANDO TEST DEL TRACKER DE MODO CARRERA", "color: #ff00ff; font-weight: bold;");
-  
-  try {
-    // 1. Limpieza y preparación
-    console.log("%c1. Preparando base de datos limpia...", "color: #aaa; font-weight: bold;");
-    localStorage.removeItem("fc26_career_tracker");
-    initStorage();
-    console.log("Equipos iniciales (debe ser vacío):", getEquipos());
+  // Referencias a elementos del DOM - Pantalla Principal
+  const crearForm = document.getElementById("crear-equipo-form");
+  const nuevoNombreInput = document.getElementById("nuevo-equipo-nombre");
+  const equiposGrid = document.getElementById("equipos-grid");
+  const btnExportar = document.getElementById("btn-exportar");
 
-    // 2. Crear equipos
-    console.log("\n%c2. Creando equipos de prueba...", "color: #aaa; font-weight: bold;");
-    const tot = crearEquipo("Tottenham Hotspur");
-    const rm = crearEquipo("Real Madrid");
-    console.log("Equipo creado:", tot);
-    console.log("Equipo creado:", rm);
-    console.log("Lista de equipos:", getEquipos());
+  // Referencias a la Pizarra Táctica (Save Activo)
+  const activeSaveContainer = document.getElementById("carrera-activa-container");
+  const activeTeamTitle = document.getElementById("active-team-title");
+  const activeTeamSubtitle = document.getElementById("active-team-subtitle");
 
-    // 3. Editar nombre de equipo
-    console.log("\n%c3. Editando nombre de equipo...", "color: #aaa; font-weight: bold;");
-    const rmEditado = editarNombreEquipo(rm.id, "Real Madrid C.F.");
-    console.log("Equipo editado (debe decir Real Madrid C.F.):", rmEditado);
+  // Referencias a elementos del DOM - Modal Renombrar
+  const editModal = document.getElementById("edit-modal");
+  const editForm = document.getElementById("edit-equipo-form");
+  const editIdInput = document.getElementById("edit-equipo-id");
+  const editNombreInput = document.getElementById("edit-equipo-nombre");
+  const btnCancelarEdit = document.getElementById("btn-cancelar-edit");
 
-    // 4. Agregar jugadores a la plantilla
-    console.log("\n%c4. Agregando jugadores a plantilla...", "color: #aaa; font-weight: bold;");
-    
-    // Jugador válido
-    const son = agregarJugador(tot.id, {
-      nombre: "Heung-min Son",
-      posiciones: ["LW", "ST"],
-      edad: 31,
-      nacionalidad: "Corea del Sur",
-      valoracion: 87,
-      potencial: 87,
-      valorMercado: 45000000,
-      estado: "Titular",
-      dorsal: 7,
-      contratoAniosRestantes: 2,
-      notas: "Capitán y referente ofensivo"
-    });
-    console.log("Jugador agregado con éxito:", son);
+  // Referencias a elementos del DOM - Modal Confirmación Eliminar
+  const confirmModal = document.getElementById("confirm-modal");
+  const deleteIdInput = document.getElementById("delete-equipo-id");
+  const deleteNombreDisplay = document.getElementById("delete-equipo-nombre");
+  const btnCancelarDelete = document.getElementById("btn-cancelar-delete");
+  const btnConfirmarDelete = document.getElementById("btn-confirmar-delete");
 
-    // Jugador válido 2 (joven promesa)
-    const gray = agregarJugador(tot.id, {
-      nombre: "Archie Gray",
-      posiciones: ["RB", "CDM", "CM"],
-      edad: 18,
-      nacionalidad: "Inglaterra",
-      valoracion: 74,
-      potencial: 88,
-      valorMercado: 12000000,
-      estado: "Rotación",
-      dorsal: 14,
-      contratoAniosRestantes: 6,
-      notas: "Excelente polivalencia y potencial"
-    });
-    console.log("Segundo jugador agregado:", gray);
+  // ==========================================
+  // 1. Gestión de Selección (Save Activo)
+  // ==========================================
 
-    // Prueba de validación: Posición incorrecta
-    console.log("%cProbando validación fallida (posición 'XYZ')...", "color: #e5c158;");
-    try {
-      agregarJugador(tot.id, {
-        nombre: "Falso Jugador",
-        posiciones: ["XYZ"],
-        edad: 20,
-        nacionalidad: "España",
-        valoracion: 80,
-        potencial: 85,
-        valorMercado: 5000000,
-        estado: "Suplente",
-        dorsal: 99,
-        contratoAniosRestantes: 3,
-        notas: ""
-      });
-      console.error("❌ ERROR: Se permitió registrar una posición inválida.");
-    } catch (e) {
-      console.log("✅ OK: Error capturado esperado:", e.message);
+  /**
+   * Marca un equipo específico como la carrera seleccionada de forma activa.
+   * @param {string|null} id - ID del equipo, o null para limpiar selección.
+   */
+  function seleccionarEquipo(id) {
+    if (!id) {
+      activeTeamId = null;
+      localStorage.removeItem("fc26_active_team_id");
+      
+      activeSaveContainer.classList.remove("active");
+      activeTeamTitle.textContent = "Ninguna carrera seleccionada";
+      activeTeamSubtitle.textContent = "Haz clic en una de tus carreras abajo para empezar a planificar tu plantilla.";
+      return;
     }
 
-    // Prueba de validación: Potencial menor que valoración
-    console.log("%cProbando validación fallida (potencial < valoración)...", "color: #e5c158;");
-    try {
-      agregarJugador(tot.id, {
-        nombre: "Falso Jugador 2",
-        posiciones: ["CB"],
-        edad: 20,
-        nacionalidad: "España",
-        valoracion: 85,
-        potencial: 80, // Menor que valoración
-        valorMercado: 5000000,
-        estado: "Suplente",
-        dorsal: 99,
-        contratoAniosRestantes: 3,
-        notas: ""
-      });
-      console.error("❌ ERROR: Se permitió registrar un potencial menor a la valoración.");
-    } catch (e) {
-      console.log("✅ OK: Error capturado esperado:", e.message);
+    const equipo = getEquipoById(id);
+    if (!equipo) {
+      // Si el equipo fue eliminado, limpiamos selección
+      seleccionarEquipo(null);
+      return;
     }
 
-    // 5. Editar jugador
-    console.log("\n%c5. Editando un jugador...", "color: #aaa; font-weight: bold;");
-    const sonEditado = editarJugador(tot.id, son.id, {
-      valoracion: 88, // Subió 1 punto
-      dorsal: 10,     // Cambio de dorsal
-      notas: "Capitán histórico, ascendido a dorsal 10"
-    });
-    console.log("Jugador después de edición:", sonEditado);
+    activeTeamId = id;
+    localStorage.setItem("fc26_active_team_id", id);
 
-    // 6. Agregar fichaje deseado
-    console.log("\n%c6. Agregando fichajes deseados...", "color: #aaa; font-weight: bold;");
-    const target1 = agregarFichajeDeseado(tot.id, {
-      nombre: "Nico Williams",
-      clubActual: "Athletic Club",
-      posiciones: ["LW", "RW"],
-      edad: 21,
-      valoracion: 84,
-      potencial: 89,
-      valorMercadoEstimado: 60000000,
-      prioridad: "Alta",
-      estado: "Pendiente",
-      notas: "Cláusula de rescisión accesible"
-    });
-    console.log("Fichaje deseado agregado:", target1);
+    // Actualizar la Pizarra Táctica visualmente
+    activeSaveContainer.classList.add("active");
+    activeTeamTitle.textContent = equipo.nombre;
 
-    // Fichaje deseado 2
-    const target2 = agregarFichajeDeseado(tot.id, {
-      nombre: "Gyökeres",
-      clubActual: "Sporting CP",
-      posiciones: ["ST"],
-      edad: 26,
-      valoracion: 84,
-      potencial: 86,
-      valorMercadoEstimado: 75000000,
-      prioridad: "Media",
-      estado: "En negociación",
-      notas: "Delantero potente"
-    });
-    console.log("Segundo fichaje deseado agregado:", target2);
-
-    // 7. Editar fichaje deseado
-    console.log("\n%c7. Editando fichaje deseado...", "color: #aaa; font-weight: bold;");
-    const target2Editado = editarFichajeDeseado(tot.id, target2.id, {
-      estado: "Fichado",
-      prioridad: "Baja",
-      notas: "¡Fichado! Proceder a registrar en la plantilla."
-    });
-    console.log("Fichaje editado:", target2Editado);
-
-    // 8. Actualizar información general
-    console.log("\n%c8. Actualizando información general del equipo...", "color: #aaa; font-weight: bold;");
-    const infoActualizada = actualizarInfoGeneral(tot.id, {
-      objetivoTemporada: "Ganar copa local y entrar en Champions",
-      objetivoLargoPlazo: "Ser campeones de Europa en 3 años",
-      presupuestoTransferencias: 95000000,
-      presupuestoSalarial: 1200000,
-      divisionLiga: "Premier League",
-      reglasPropias: [
-        "Fichar solo canteranos o menores de 23 años",
-        "No pagar más de 200k/semana de salario"
-      ],
-      notas: [
-        { fecha: "2026-06-19", texto: "Pretemporada excelente. Fichamos a Gyökeres." }
-      ]
-    });
-    console.log("Información general del equipo:", infoActualizada);
-
-    // 9. Eliminar un equipo
-    console.log("\n%c9. Eliminando un equipo de prueba...", "color: #aaa; font-weight: bold;");
-    console.log("Equipos antes de eliminar:", getEquipos().map(e => e.nombre));
-    eliminarEquipo(rm.id);
-    console.log("Equipos después de eliminar Real Madrid (debe quedar solo uno):", getEquipos().map(e => e.nombre));
-
-    // 10. Eliminar jugador y fichaje deseado
-    console.log("\n%c10. Eliminando jugador y fichaje deseado...", "color: #aaa; font-weight: bold;");
-    const totActualizado = getEquipoById(tot.id);
-    console.log("Antes - Jugadores:", totActualizado.plantilla.length, "Fichajes:", totActualizado.fichajesDeseados.length);
-    eliminarJugador(tot.id, gray.id);
-    eliminarFichajeDeseado(tot.id, target1.id);
-    const totDespues = getEquipoById(tot.id);
-    console.log("Después - Jugadores (debe ser 1):", totDespues.plantilla.length, "Fichajes (debe ser 1):", totDespues.fichajesDeseados.length);
-
-    console.log("\n%c🔍 Estado final del storage:", "color: #00ff88; font-weight: bold;");
-    console.log(getStorage());
-
-    // 11. Descargar copia JSON
-    console.log("\n%c11. Probando exportación JSON...", "color: #aaa; font-weight: bold;");
-    console.log("Abriendo diálogo de descarga de archivo...");
-    exportarStorageJSON();
-
-    console.log("\n%c🎉 ¡TODAS LAS PRUEBAS COMPLETADAS CON ÉXITO! 🎉", "color: #00ff00; font-weight: bold; font-size: 14px;");
-
-  } catch (error) {
-    console.error("❌ ERROR DURANTE LAS PRUEBAS:", error);
-  } finally {
-    console.groupEnd();
+    const totalPlantilla = equipo.plantilla ? equipo.plantilla.length : 0;
+    const totalFichajes = equipo.fichajesDeseados ? equipo.fichajesDeseados.length : 0;
+    activeTeamSubtitle.textContent = `Plantilla: ${totalPlantilla} jugadores | Fichajes en carpeta: ${totalFichajes} jugadores. (Fase 3: Gestión completa próximamente)`;
   }
-}
 
-// Exponer probarTracker de forma global
-if (typeof window !== "undefined") {
-  window.probarTracker = probarTracker;
-}
+  // ==========================================
+  // 2. Renderizado de Tarjetas de Equipos
+  // ==========================================
+
+  /**
+   * Renderiza las tarjetas en el grid de la página.
+   */
+  function renderEquipos() {
+    const equipos = getEquipos();
+    equiposGrid.innerHTML = "";
+
+    // Si el equipo seleccionado activo ya no existe en el storage, lo deselecciona
+    if (activeTeamId && !equipos.some(e => e.id === activeTeamId)) {
+      seleccionarEquipo(null);
+    }
+
+    if (equipos.length === 0) {
+      equiposGrid.innerHTML = `
+        <div class="empty-state">
+          <h3 class="empty-state-title">Tu pizarra de director técnico está vacía</h3>
+          <p class="empty-state-text">¡Crea tu primer save de modo carrera escribiendo el nombre de tu club arriba!</p>
+        </div>
+      `;
+      return;
+    }
+
+    equipos.forEach(equipo => {
+      const totalPlantilla = equipo.plantilla ? equipo.plantilla.length : 0;
+      const totalFichajes = equipo.fichajesDeseados ? equipo.fichajesDeseados.length : 0;
+      const esActivo = equipo.id === activeTeamId;
+
+      const card = document.createElement("div");
+      card.className = `team-card ${esActivo ? "active-save" : ""}`;
+      card.innerHTML = `
+        <div class="team-card-header">
+          <h3 class="team-card-title" title="${equipo.nombre}">${equipo.nombre}</h3>
+          ${esActivo ? `<span class="active-save-badge">Activo</span>` : ""}
+        </div>
+        
+        <div class="team-stats">
+          <div class="stat-item">
+            <span class="stat-label">Plantilla</span>
+            <span class="stat-value">${totalPlantilla}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Fichajes</span>
+            <span class="stat-value">${totalFichajes}</span>
+          </div>
+        </div>
+
+        <div class="team-actions">
+          <button class="btn btn-primary btn-gestionar" data-id="${equipo.id}">
+            Gestionar
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <div class="actions-left">
+            <button class="btn btn-secondary btn-icon btn-renombrar" data-id="${equipo.id}" data-nombre="${equipo.nombre}" title="Renombrar club">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"/></svg>
+            </button>
+            <button class="btn btn-danger btn-icon btn-eliminar" data-id="${equipo.id}" data-nombre="${equipo.nombre}" title="Eliminar carrera">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            </button>
+          </div>
+        </div>
+      `;
+
+      // Hacer que toda la tarjeta sea clickable para seleccionar el save (human aspect / UX fluida)
+      card.addEventListener("click", (e) => {
+        // Ignorar si el usuario clickea los botones específicos dentro de la tarjeta
+        if (e.target.closest(".team-actions") || e.target.closest(".btn-icon")) {
+          return;
+        }
+        seleccionarEquipo(equipo.id);
+        renderEquipos();
+      });
+
+      equiposGrid.appendChild(card);
+    });
+
+    // Enlazar eventos de los botones de acción
+    const btnsGestionar = equiposGrid.querySelectorAll(".btn-gestionar");
+    const btnsRenombrar = equiposGrid.querySelectorAll(".btn-renombrar");
+    const btnsEliminar = equiposGrid.querySelectorAll(".btn-eliminar");
+
+    btnsGestionar.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = e.currentTarget.getAttribute("data-id");
+        seleccionarEquipo(id);
+        renderEquipos();
+      });
+    });
+
+    btnsRenombrar.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = e.currentTarget.getAttribute("data-id");
+        const nombre = e.currentTarget.getAttribute("data-nombre");
+        abrirModalRenombrar(id, nombre);
+      });
+    });
+
+    btnsEliminar.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = e.currentTarget.getAttribute("data-id");
+        const nombre = e.currentTarget.getAttribute("data-nombre");
+        abrirModalConfirmacion(id, nombre);
+      });
+    });
+  }
+
+  // ==========================================
+  // 3. Control de Modales
+  // ==========================================
+
+  // Modal Renombrar
+  function abrirModalRenombrar(id, nombre) {
+    editIdInput.value = id;
+    editNombreInput.value = nombre;
+    editModal.classList.add("active");
+    setTimeout(() => editNombreInput.focus(), 100);
+  }
+
+  function cerrarModalRenombrar() {
+    editModal.classList.remove("active");
+    editForm.reset();
+  }
+
+  // Modal Confirmación Eliminar
+  function abrirModalConfirmacion(id, nombre) {
+    deleteIdInput.value = id;
+    deleteNombreDisplay.textContent = nombre;
+    confirmModal.classList.add("active");
+  }
+
+  function cerrarModalConfirmacion() {
+    confirmModal.classList.remove("active");
+    deleteNombreDisplay.textContent = "";
+    deleteIdInput.value = "";
+  }
+
+  // ==========================================
+  // 4. Event Listeners
+  // ==========================================
+
+  // Crear Equipo nuevo
+  crearForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const nombre = nuevoNombreInput.value.trim();
+    if (nombre) {
+      try {
+        const nuevoClub = crearEquipo(nombre);
+        nuevoNombreInput.value = "";
+        
+        // Al crear un save nuevo, lo hacemos el activo automáticamente (toque UX inteligente)
+        seleccionarEquipo(nuevoClub.id);
+        renderEquipos();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+  });
+
+  // Guardar cambio de nombre en el modal
+  editForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const id = editIdInput.value;
+    const nuevoNombre = editNombreInput.value.trim();
+
+    if (id && nuevoNombre) {
+      try {
+        editarNombreEquipo(id, nuevoNombre);
+        cerrarModalRenombrar();
+        
+        // Si el equipo editado era el activo, actualizamos el banner
+        if (id === activeTeamId) {
+          seleccionarEquipo(id);
+        }
+        
+        renderEquipos();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+  });
+
+  // Confirmar eliminación del equipo
+  btnConfirmarDelete.addEventListener("click", () => {
+    const id = deleteIdInput.value;
+    if (id) {
+      try {
+        eliminarEquipo(id);
+        
+        // Si borramos el equipo activo, limpiamos la selección
+        if (id === activeTeamId) {
+          seleccionarEquipo(null);
+        }
+        
+        cerrarModalConfirmacion();
+        renderEquipos();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+  });
+
+  // Cancelar modales
+  btnCancelarEdit.addEventListener("click", cerrarModalRenombrar);
+  btnCancelarDelete.addEventListener("click", cerrarModalConfirmacion);
+
+  // Cerrar modales haciendo click fuera del contenido
+  window.addEventListener("click", (e) => {
+    if (e.target === editModal) cerrarModalRenombrar();
+    if (e.target === confirmModal) cerrarModalConfirmacion();
+  });
+
+  // Exportar respaldo JSON
+  btnExportar.addEventListener("click", () => {
+    exportarStorageJSON();
+  });
+
+  // ==========================================
+  // 5. Inicialización
+  // ==========================================
+  renderEquipos();
+  
+  // Si había un equipo activo previamente, lo cargamos
+  if (activeTeamId) {
+    seleccionarEquipo(activeTeamId);
+  }
+});
