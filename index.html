@@ -9,7 +9,7 @@
 <body>
   <div class="app-container">
     
-    <!-- Cabecera Principal -->
+    <!-- Cabecera Principal (Compartida) -->
     <header class="app-header">
       <div class="brand-section">
         <h1>FC 26 <span>Career Tracker</span></h1>
@@ -23,45 +23,234 @@
       </div>
     </header>
 
-    <!-- Pizarra Táctica / Save Activo -->
-    <section id="carrera-activa-container" class="active-save-banner">
-      <div class="tactical-board">
-        <div class="tactical-tag">Táctica de Director Técnico</div>
-        <h2 id="active-team-title">Ninguna carrera seleccionada</h2>
-        <p id="active-team-subtitle">Haz clic en una de tus carreras abajo para empezar a planificar tu plantilla.</p>
-      </div>
-    </section>
-
-    <!-- Formulario para Iniciar Carrera -->
-    <section class="creator-card">
-      <h2>Elige tu próximo reto en el banquillo</h2>
-      <form id="crear-equipo-form" class="form-group-inline">
-        <div class="form-control-wrapper">
-          <input type="text" id="nuevo-equipo-nombre" class="form-control" placeholder="Nombre de tu club (ej. Tottenham Hotspur, Real Madrid...)" required autocomplete="off">
+    <!-- ==========================================
+         VISTA 1: DASHBOARD (LISTADO DE EQUIPOS)
+         ========================================== -->
+    <div id="vista-dashboard">
+      <!-- Pizarra Táctica / Save Activo -->
+      <section id="carrera-activa-container" class="active-save-banner">
+        <div class="tactical-board">
+          <div class="tactical-tag">Táctica de Director Técnico</div>
+          <h2 id="active-team-title">Ninguna carrera seleccionada</h2>
+          <p id="active-team-subtitle">Haz clic en una de tus carreras abajo para empezar a planificar tu plantilla o haz clic en Gestionar.</p>
         </div>
-        <button type="submit" class="btn btn-primary">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Iniciar Carrera
-        </button>
-      </form>
-    </section>
+      </section>
 
-    <!-- Listado de Equipos -->
-    <section>
-      <h2 class="section-title">Mis Saves y Proyectos</h2>
-      <div id="equipos-grid" class="equipos-grid">
-        <!-- Generado dinámicamente por JavaScript -->
+      <!-- Formulario para Iniciar Carrera -->
+      <section class="creator-card">
+        <h2>Elige tu próximo reto en el banquillo</h2>
+        <form id="crear-equipo-form" class="form-group-inline">
+          <div class="form-control-wrapper">
+            <input type="text" id="nuevo-equipo-nombre" class="form-control" placeholder="Nombre de tu club (ej. Tottenham Hotspur, Real Madrid...)" required autocomplete="off">
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Iniciar Carrera
+          </button>
+        </form>
+      </section>
+
+      <!-- Listado de Equipos -->
+      <section>
+        <h2 class="section-title">Mis Saves y Proyectos</h2>
+        <div id="equipos-grid" class="equipos-grid">
+          <!-- Generado dinámicamente por JavaScript -->
+        </div>
+      </section>
+    </div>
+
+    <!-- ==========================================
+         VISTA 2: DETALLES DE EQUIPO (TABS)
+         ========================================== -->
+    <div id="vista-equipo" style="display: none;">
+      <!-- Cabecera de Equipo Abierto -->
+      <section class="team-header-panel">
+        <div class="team-info-left">
+          <button id="btn-volver-dashboard" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Volver a mis equipos
+          </button>
+          <h2 id="team-view-name" class="team-view-title">Nombre del Club</h2>
+        </div>
+        <div class="team-info-stats">
+          <div class="stat-bubble">
+            <span class="bubble-label">Plantilla</span>
+            <span id="team-header-squad-count" class="bubble-val">0</span>
+          </div>
+          <div class="stat-bubble">
+            <span class="bubble-label">Fichajes</span>
+            <span id="team-header-transfers-count" class="bubble-val">0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Barra de Pestañas (Tabs) -->
+      <nav class="tabs-nav">
+        <button class="tab-btn active" data-tab="tab-plantilla">Plantilla</button>
+        <button class="tab-btn" data-tab="tab-fichajes">Fichajes Deseados</button>
+        <button class="tab-btn" data-tab="tab-info">Información General</button>
+      </nav>
+
+      <!-- Panel 1: Plantilla (CRUD Completo de Jugadores) -->
+      <div id="tab-plantilla" class="tab-panel active">
+        <div class="squad-workspace">
+          
+          <!-- Lado Izquierdo: Formulario de Jugador -->
+          <div class="squad-form-container">
+            <div class="panel-card">
+              <h3 id="form-jugador-titulo">Agregar Jugador</h3>
+              <form id="form-jugador">
+                <input type="hidden" id="jugador-id">
+                
+                <div class="form-grid-2">
+                  <div class="form-field">
+                    <label for="jugador-nombre">Nombre</label>
+                    <input type="text" id="jugador-nombre" class="form-control" placeholder="Ej. Son, Maddison..." required autocomplete="off">
+                  </div>
+                  <div class="form-field">
+                    <label for="jugador-nacionalidad">Nacionalidad</label>
+                    <input type="text" id="jugador-nacionalidad" class="form-control" placeholder="Ej. Corea del Sur..." required autocomplete="off">
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label>Posiciones (Elige una o más)</label>
+                  <div class="positions-checkbox-grid">
+                    <!-- Checkboxes para las posiciones EA FC -->
+                    <label class="cb-label"><input type="checkbox" name="posicion" value="GK"> GK</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion" value="CB"> CB</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion" value="LB"> LB</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion" value="RB"> RB</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion" value="LWB"> LWB</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion" value="RWB"> RWB</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion" value="CDM"> CDM</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion" value="CM"> CM</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion" value="CAM"> CAM</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion" value="LM"> LM</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion" value="RM"> RM</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion" value="LW"> LW</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion" value="RW"> RW</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion" value="ST"> ST</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion" value="CF"> CF</label>
+                  </div>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="form-field">
+                    <label for="jugador-edad">Edad</label>
+                    <input type="number" id="jugador-edad" class="form-control" min="15" max="50" required>
+                  </div>
+                  <div class="form-field">
+                    <label for="jugador-dorsal">Dorsal</label>
+                    <input type="number" id="jugador-dorsal" class="form-control" min="1" max="99" required>
+                  </div>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="form-field">
+                    <label for="jugador-valoracion">Valoración (OVR)</label>
+                    <input type="number" id="jugador-valoracion" class="form-control" min="1" max="99" required>
+                  </div>
+                  <div class="form-field">
+                    <label for="jugador-potencial">Potencial</label>
+                    <input type="number" id="jugador-potencial" class="form-control" min="1" max="99" required>
+                  </div>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="form-field">
+                    <label for="jugador-estado">Estado</label>
+                    <select id="jugador-estado" class="form-control" required>
+                      <option value="Titular">Titular</option>
+                      <option value="Suplente">Suplente</option>
+                      <option value="Rotación">Rotación</option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label for="jugador-contrato">Años Contrato</label>
+                    <input type="number" id="jugador-contrato" class="form-control" min="0" max="15" required>
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label for="jugador-valormercado">Valor de Mercado (€)</label>
+                  <input type="number" id="jugador-valormercado" class="form-control" min="0" placeholder="Ej. 45000000" required>
+                </div>
+
+                <div class="form-field">
+                  <label for="jugador-notas">Notas</label>
+                  <textarea id="jugador-notas" class="form-control" rows="3" placeholder="Rasgos especiales, cláusula de rescisión, observaciones..."></textarea>
+                </div>
+
+                <div class="form-actions-row">
+                  <button type="button" id="btn-cancelar-jugador" class="btn btn-secondary" style="display: none;">Cancelar Edición</button>
+                  <button type="submit" id="btn-guardar-jugador" class="btn btn-primary">Guardar Jugador</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Lado Derecho: Listado de Jugadores -->
+          <div class="squad-list-container">
+            <div class="panel-card">
+              <h3>Plantilla Actual</h3>
+              <div class="table-responsive">
+                <table class="squad-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px; text-align: center;">DOR</th>
+                      <th>Nombre</th>
+                      <th>Posición</th>
+                      <th style="width: 65px; text-align: center;">Edad</th>
+                      <th style="width: 65px; text-align: center;">OVR</th>
+                      <th style="width: 90px; text-align: right;">Valor</th>
+                      <th style="width: 100px; text-align: center;">Estado</th>
+                      <th style="width: 110px; text-align: right;">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="plantilla-tbody">
+                    <!-- Generado dinámicamente -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
-    </section>
 
-    <!-- Pie de Página Personalizado (Toque Humano) -->
+      <!-- Panel 2: Fichajes Deseados (Placeholder) -->
+      <div id="tab-fichajes" class="tab-panel">
+        <div class="placeholder-panel">
+          <div class="placeholder-panel-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Fichajes Deseados</h3>
+          <p>La pestaña de seguimiento y negociación de fichajes estará disponible en la Fase 5.</p>
+        </div>
+      </div>
+
+      <!-- Panel 3: Información General (Placeholder) -->
+      <div id="tab-info" class="tab-panel">
+        <div class="placeholder-panel">
+          <div class="placeholder-panel-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+          <h3>Información General y Bitácora</h3>
+          <p>Los objetivos de la temporada, presupuestos, reglas del save y bitácora estarán disponibles en la Fase 6.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Pie de Página (Compartido) -->
     <footer class="app-footer">
-      <p>Diseñado con pasión por Carlos. Todo se guarda localmente en tu navegador. Cero servidores, cero tracking.</p>
+      <p> 2026 Carlos Nares.Todo se guarda localmente en tu navegador. Cero servidores, cero tracking.</p>
     </footer>
 
   </div>
 
-  <!-- Modal Personalizado para Renombrar -->
+  <!-- Modal Personalizado para Renombrar Equipo -->
   <div id="edit-modal" class="modal-overlay">
     <div class="modal-content">
       <h3 class="modal-title">Renombrar Club</h3>
@@ -78,7 +267,7 @@
     </div>
   </div>
 
-  <!-- Modal Personalizado de Confirmación para Eliminar -->
+  <!-- Modal Personalizado de Confirmación para Eliminar Equipo -->
   <div id="confirm-modal" class="modal-overlay">
     <div class="modal-content">
       <h3 class="modal-title" style="color: var(--danger);">¿Eliminar este Save por completo?</h3>
@@ -90,6 +279,22 @@
       <div class="modal-footer">
         <button id="btn-cancelar-delete" class="btn btn-secondary">Conservar Save</button>
         <button id="btn-confirmar-delete" class="btn btn-danger">Sí, borrar de todos modos</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Personalizado de Confirmación para Eliminar Jugador -->
+  <div id="confirm-jugador-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 class="modal-title" style="color: var(--danger);">¿Eliminar Jugador?</h3>
+      <div class="modal-body">
+        <p style="color: var(--text-muted); font-size: 0.95rem;">¿Estás seguro de que deseas eliminar a <strong id="delete-jugador-nombre" style="color: #fff;"></strong> de la plantilla?</p>
+        <input type="hidden" id="delete-jugador-equipo-id">
+        <input type="hidden" id="delete-jugador-id">
+      </div>
+      <div class="modal-footer">
+        <button id="btn-cancelar-delete-jugador" class="btn btn-secondary">Conservar Jugador</button>
+        <button id="btn-confirmar-delete-jugador" class="btn btn-danger">Sí, eliminar</button>
       </div>
     </div>
   </div>
