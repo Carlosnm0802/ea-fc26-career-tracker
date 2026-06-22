@@ -21,11 +21,54 @@ function formatearMonedaCompacta(valor) {
   return `€${valor}`;
 }
 
+/**
+ * Renderiza los badges de posiciones con sus respectivos contadores de forma genérica.
+ * @param {Array} items - Listado de jugadores o fichajes.
+ * @param {HTMLElement} container - Contenedor en el DOM.
+ * @param {string|null} filtroActivo - Filtro de posición seleccionado.
+ * @param {Function} callback - Acción a ejecutar tras el click (pasa la posición clickeada o null).
+ */
+function renderizarBadgesPosicion(items, container, filtroActivo, callback) {
+  const posicionesFifa = ["GK", "CB", "LB", "RB", "LWB", "RWB", "CDM", "CM", "CAM", "LM", "RM", "LW", "RW", "ST", "CF"];
+  const counts = {};
+  posicionesFifa.forEach(pos => counts[pos] = 0);
+
+  items.forEach(item => {
+    if (Array.isArray(item.posiciones)) {
+      item.posiciones.forEach(pos => {
+        if (counts[pos] !== undefined) counts[pos]++;
+      });
+    }
+  });
+
+  container.innerHTML = "";
+  posicionesFifa.forEach(pos => {
+    const count = counts[pos];
+    const esActivo = pos === filtroActivo;
+
+    const badge = document.createElement("div");
+    badge.className = `pos-summary-card ${esActivo ? "active" : ""}`;
+    badge.innerHTML = `${pos} <span class="badge-count">${count}</span>`;
+
+    badge.addEventListener("click", () => {
+      const nuevoFiltro = (filtroActivo === pos) ? null : pos;
+      callback(nuevoFiltro);
+    });
+
+    container.appendChild(badge);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // Estados y persistencia de la sesión
   let activeTeamId = localStorage.getItem("fc26_active_team_id") || null;
   let currentOpenTeamId = sessionStorage.getItem("fc26_open_team_id") || null;
   let filtroPosicionActivo = null;
+
+  // Estados de filtros para Fichajes Deseados
+  let filtroFichajePosicion = null;
+  let filtroFichajePrioridad = "";
+  let filtroFichajeEstado = "";
 
   // ==========================================
   // ELEMENTOS DEL DOM - GENERALES Y NAVEGACIÓN
@@ -77,6 +120,32 @@ document.addEventListener("DOMContentLoaded", () => {
   const plantillaTbody = document.getElementById("plantilla-tbody");
 
   // ==========================================
+  // ELEMENTOS DEL DOM - CRUD DE FICHAJES DESEADOS
+  // ==========================================
+  const formFichaje = document.getElementById("form-fichaje");
+  const formFichajeTitulo = document.getElementById("form-fichaje-titulo");
+  const inputFichajeId = document.getElementById("fichaje-id");
+  const inputFichajeNombre = document.getElementById("fichaje-nombre");
+  const inputFichajeClub = document.getElementById("fichaje-club");
+  const checkboxesPosicionFichaje = document.getElementsByName("posicion-fichaje");
+  const inputFichajeEdad = document.getElementById("fichaje-edad");
+  const inputFichajeValorMercado = document.getElementById("fichaje-valormercado");
+  const inputFichajeValoracion = document.getElementById("fichaje-valoracion");
+  const inputFichajePotencial = document.getElementById("fichaje-potencial");
+  const selectFichajePrioridad = document.getElementById("fichaje-prioridad");
+  const selectFichajeEstado = document.getElementById("fichaje-estado");
+  const inputFichajeNotas = document.getElementById("fichaje-notas");
+
+  const btnCancelarFichaje = document.getElementById("btn-cancelar-fichaje");
+  const btnGuardarFichaje = document.getElementById("btn-guardar-fichaje");
+  const fichajesTbody = document.getElementById("fichajes-tbody");
+
+  const posicionesResumenFichajesContainer = document.getElementById("posiciones-resumen-fichajes-container");
+  const btnVerTodosFichajes = document.getElementById("btn-ver-todos-fichajes");
+  const selectFiltroFichajePrioridad = document.getElementById("filtro-fichaje-prioridad");
+  const selectFiltroFichajeEstado = document.getElementById("filtro-fichaje-estado");
+
+  // ==========================================
   // ELEMENTOS DEL DOM - MODALES PERSONALIZADOS
   // ==========================================
   
@@ -101,6 +170,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const deleteJugadorNombreDisplay = document.getElementById("delete-jugador-nombre");
   const btnCancelarDeleteJugador = document.getElementById("btn-cancelar-delete-jugador");
   const btnConfirmarDeleteJugador = document.getElementById("btn-confirmar-delete-jugador");
+
+  // Modal Eliminar Fichaje
+  const confirmFichajeModal = document.getElementById("confirm-fichaje-modal");
+  const deleteFichajeIdInput = document.getElementById("delete-fichaje-id");
+  const deleteFichajeEquipoIdInput = document.getElementById("delete-fichaje-equipo-id");
+  const deleteFichajeNombreDisplay = document.getElementById("delete-fichaje-nombre");
+  const btnCancelarDeleteFichaje = document.getElementById("btn-cancelar-delete-fichaje");
+  const btnConfirmarDeleteFichaje = document.getElementById("btn-confirmar-delete-fichaje");
 
   // ==========================================
   // 1. CONTROL DE NAVEGACIÓN Y TABS
@@ -132,9 +209,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // Por defecto abrimos la pestaña Plantilla
     cambiarPestana("tab-plantilla");
 
+    // Limpiar filtros de Fichajes Deseados al abrir equipo
+    filtroFichajePosicion = null;
+    filtroFichajePrioridad = "";
+    filtroFichajeEstado = "";
+    if (selectFiltroFichajePrioridad) selectFiltroFichajePrioridad.value = "";
+    if (selectFiltroFichajeEstado) selectFiltroFichajeEstado.value = "";
+
     // Limpiar formulario y renderizar la plantilla actual del club
     resetFormularioJugador();
+    resetFormularioFichaje();
     renderPlantilla();
+    renderFichajes();
   }
 
   /**
@@ -346,41 +432,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const jugadores = equipo.plantilla || [];
 
-    // --- CÁLCULO DINÁMICO DE CONTEO POR POSICIÓN ---
-    const posicionesFifa = ["GK", "CB", "LB", "RB", "LWB", "RWB", "CDM", "CM", "CAM", "LM", "RM", "LW", "RW", "ST", "CF"];
-    const counts = {};
-    posicionesFifa.forEach(pos => counts[pos] = 0);
-
-    jugadores.forEach(jugador => {
-      if (Array.isArray(jugador.posiciones)) {
-        jugador.posiciones.forEach(pos => {
-          if (counts[pos] !== undefined) {
-            counts[pos]++;
-          }
-        });
-      }
-    });
-
-    // Renderizar los badges de posiciones
-    posicionesResumenContainer.innerHTML = "";
-    posicionesFifa.forEach(pos => {
-      const count = counts[pos];
-      const esActivo = pos === filtroPosicionActivo;
-
-      const cardBadge = document.createElement("div");
-      cardBadge.className = `pos-summary-card ${esActivo ? "active" : ""}`;
-      cardBadge.innerHTML = `${pos} <span class="badge-count">${count}</span>`;
-
-      cardBadge.addEventListener("click", () => {
-        if (filtroPosicionActivo === pos) {
-          filtroPosicionActivo = null;
-        } else {
-          filtroPosicionActivo = pos;
-        }
-        renderPlantilla();
-      });
-
-      posicionesResumenContainer.appendChild(cardBadge);
+    // --- CONTEO Y RENDERIZADO DE BADGES POR POSICIÓN ---
+    renderizarBadgesPosicion(jugadores, posicionesResumenContainer, filtroPosicionActivo, (pos) => {
+      filtroPosicionActivo = pos;
+      renderPlantilla();
     });
 
     // Controlar visibilidad del botón "Ver todos"
@@ -684,12 +739,14 @@ document.addEventListener("DOMContentLoaded", () => {
   btnCancelarEdit.addEventListener("click", cerrarModalRenombrar);
   btnCancelarDelete.addEventListener("click", cerrarModalConfirmacion);
   btnCancelarDeleteJugador.addEventListener("click", cerrarModalEliminarJugador);
+  btnCancelarDeleteFichaje.addEventListener("click", cerrarModalEliminarFichaje);
 
   // Cerrar modales haciendo click fuera del contenido
   window.addEventListener("click", (e) => {
     if (e.target === editModal) cerrarModalRenombrar();
     if (e.target === confirmModal) cerrarModalConfirmacion();
     if (e.target === confirmJugadorModal) cerrarModalEliminarJugador();
+    if (e.target === confirmFichajeModal) cerrarModalEliminarFichaje();
   });
 
   // Exportar respaldo JSON
@@ -701,6 +758,249 @@ document.addEventListener("DOMContentLoaded", () => {
   btnVerTodos.addEventListener("click", () => {
     filtroPosicionActivo = null;
     renderPlantilla();
+  });
+
+  // ==========================================
+  // LÓGICA DE FICHAJES DESEADOS
+  // ==========================================
+
+  /**
+   * Renderiza el listado de fichajes deseados en la tabla con sus filtros.
+   */
+  function renderFichajes() {
+    fichajesTbody.innerHTML = "";
+    const equipo = getEquipoById(currentOpenTeamId);
+    if (!equipo) return;
+
+    actualizarHeaderContadores(equipo);
+
+    const fichajes = equipo.fichajesDeseados || [];
+
+    // Renderizar los badges de posiciones
+    renderizarBadgesPosicion(fichajes, posicionesResumenFichajesContainer, filtroFichajePosicion, (pos) => {
+      filtroFichajePosicion = pos;
+      renderFichajes();
+    });
+
+    // Controlar visibilidad del botón "Ver todos" en fichajes
+    const algunFiltroActivo = filtroFichajePosicion || filtroFichajePrioridad || filtroFichajeEstado;
+    if (algunFiltroActivo) {
+      btnVerTodosFichajes.style.display = "inline-flex";
+    } else {
+      btnVerTodosFichajes.style.display = "none";
+    }
+
+    // Filtrar fichajes combinadamente
+    let filtered = [...fichajes];
+
+    if (filtroFichajePosicion) {
+      filtered = filtered.filter(f => f.posiciones && f.posiciones.includes(filtroFichajePosicion));
+    }
+    if (filtroFichajePrioridad) {
+      filtered = filtered.filter(f => f.prioridad === filtroFichajePrioridad);
+    }
+    if (filtroFichajeEstado) {
+      filtered = filtered.filter(f => f.estado === filtroFichajeEstado);
+    }
+
+    if (filtered.length === 0) {
+      let msg = "No hay fichajes en carpeta con los filtros seleccionados.";
+      if (fichajes.length === 0) {
+        msg = "No hay fichajes en tu carpeta de seguimiento. ¡Agrégalos usando el formulario de la izquierda!";
+      }
+      fichajesTbody.innerHTML = `
+        <tr>
+          <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">
+            ${msg}
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    filtered.forEach(fichaje => {
+      const posBadges = fichaje.posiciones.map(pos => `<span class="player-position-badge">${pos}</span>`).join("");
+      
+      let prioridadClass = "priority-baja";
+      if (fichaje.prioridad === "Alta") prioridadClass = "priority-alta";
+      if (fichaje.prioridad === "Media") prioridadClass = "priority-media";
+
+      let estadoClass = "status-fichaje-pendiente";
+      if (fichaje.estado === "En negociación") estadoClass = "status-fichaje-negociacion";
+      if (fichaje.estado === "Fichado") estadoClass = "status-fichaje-fichado";
+      if (fichaje.estado === "Descartado") estadoClass = "status-fichaje-descartado";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>
+          <div style="font-weight: 600; color: #ffffff;">${fichaje.nombre}</div>
+        </td>
+        <td>
+          <div style="color: #ffffff;">${fichaje.clubActual}</div>
+        </td>
+        <td>${posBadges}</td>
+        <td style="text-align: center;">${fichaje.edad}</td>
+        <td style="text-align: center; font-weight: bold; color: var(--primary);">${fichaje.valoracion}</td>
+        <td style="text-align: center; font-weight: bold; color: var(--accent);">${fichaje.potencial}</td>
+        <td style="text-align: right; font-weight: 500; color: #ffffff;">${formatearMonedaCompacta(fichaje.valorMercadoEstimado)}</td>
+        <td style="text-align: center;"><span class="priority-badge ${prioridadClass}">${fichaje.prioridad}</span></td>
+        <td style="text-align: center;"><span class="status-fichaje-badge ${estadoClass}">${fichaje.estado}</span></td>
+        <td>
+          <div class="player-actions">
+            <button class="btn btn-secondary btn-icon btn-editar-fichaje" data-id="${fichaje.id}" title="Editar fichaje">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"/></svg>
+            </button>
+            <button class="btn btn-danger btn-icon btn-eliminar-fichaje" data-id="${fichaje.id}" data-nombre="${fichaje.nombre}" title="Eliminar fichaje">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            </button>
+          </div>
+        </td>
+      `;
+
+      tr.querySelector(".btn-editar-fichaje").addEventListener("click", () => {
+        cargarFichajeEnFormulario(fichaje);
+      });
+
+      tr.querySelector(".btn-eliminar-fichaje").addEventListener("click", () => {
+        abrirModalEliminarFichaje(fichaje.id, fichaje.nombre);
+      });
+
+      fichajesTbody.appendChild(tr);
+    });
+  }
+
+  /**
+   * Resetea el formulario de fichaje a su estado inicial.
+   */
+  function resetFormularioFichaje() {
+    formFichaje.reset();
+    inputFichajeId.value = "";
+    formFichajeTitulo.textContent = "Agregar Fichaje Deseado";
+    btnCancelarFichaje.style.display = "none";
+    btnGuardarFichaje.textContent = "Guardar Fichaje";
+    checkboxesPosicionFichaje.forEach(cb => cb.checked = false);
+  }
+
+  /**
+   * Carga los datos de un fichaje en el formulario para editarlo.
+   */
+  function cargarFichajeEnFormulario(fichaje) {
+    formFichajeTitulo.textContent = "Editar Fichaje Deseado";
+    btnCancelarFichaje.style.display = "inline-flex";
+    btnGuardarFichaje.textContent = "Actualizar Fichaje";
+
+    inputFichajeId.value = fichaje.id;
+    inputFichajeNombre.value = fichaje.nombre;
+    inputFichajeClub.value = fichaje.clubActual;
+    inputFichajeEdad.value = fichaje.edad;
+    inputFichajeValorMercado.value = fichaje.valorMercadoEstimado;
+    inputFichajeValoracion.value = fichaje.valoracion;
+    inputFichajePotencial.value = fichaje.potencial;
+    selectFichajePrioridad.value = fichaje.prioridad;
+    selectFichajeEstado.value = fichaje.estado;
+    inputFichajeNotas.value = fichaje.notes || fichaje.notas || "";
+
+    checkboxesPosicionFichaje.forEach(cb => {
+      cb.checked = fichaje.posiciones.includes(cb.value);
+    });
+
+    formFichaje.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // Modal Confirmación Eliminar Fichaje
+  function abrirModalEliminarFichaje(id, nombre) {
+    deleteFichajeIdInput.value = id;
+    deleteFichajeEquipoIdInput.value = currentOpenTeamId;
+    deleteFichajeNombreDisplay.textContent = nombre;
+    confirmFichajeModal.classList.add("active");
+  }
+
+  function cerrarModalEliminarFichaje() {
+    confirmFichajeModal.classList.remove("active");
+    deleteFichajeNombreDisplay.textContent = "";
+    deleteFichajeIdInput.value = "";
+    deleteFichajeEquipoIdInput.value = "";
+  }
+
+  // Submit del formulario de fichaje
+  formFichaje.addEventListener("submit", (e) => {
+    e.preventDefault();
+    
+    const posicionesSeleccionadas = [];
+    checkboxesPosicionFichaje.forEach(cb => {
+      if (cb.checked) posicionesSeleccionadas.push(cb.value);
+    });
+
+    if (posicionesSeleccionadas.length === 0) {
+      alert("Debes elegir al menos una posición para el fichaje.");
+      return;
+    }
+
+    const fichajeData = {
+      nombre: inputFichajeNombre.value.trim(),
+      clubActual: inputFichajeClub.value.trim(),
+      posiciones: posicionesSeleccionadas,
+      edad: Number(inputFichajeEdad.value),
+      valoracion: Number(inputFichajeValoracion.value),
+      potencial: Number(inputFichajePotencial.value),
+      valorMercadoEstimado: Number(inputFichajeValorMercado.value),
+      prioridad: selectFichajePrioridad.value,
+      estado: selectFichajeEstado.value,
+      notas: inputFichajeNotas.value.trim()
+    };
+
+    const fichajeId = inputFichajeId.value;
+
+    try {
+      if (fichajeId) {
+        editarFichajeDeseado(currentOpenTeamId, fichajeId, fichajeData);
+      } else {
+        agregarFichajeDeseado(currentOpenTeamId, fichajeData);
+      }
+
+      resetFormularioFichaje();
+      renderFichajes();
+    } catch (error) {
+      alert(error.message);
+    }
+  });
+
+  btnCancelarFichaje.addEventListener("click", resetFormularioFichaje);
+
+  // Confirmar eliminación
+  btnConfirmarDeleteFichaje.addEventListener("click", () => {
+    const fichajeId = deleteFichajeIdInput.value;
+    const equipoId = deleteFichajeEquipoIdInput.value;
+    
+    if (fichajeId && equipoId) {
+      try {
+        eliminarFichajeDeseado(equipoId, fichajeId);
+        cerrarModalEliminarFichaje();
+        renderFichajes();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+  });
+
+  // Filtros combinados de Fichajes
+  selectFiltroFichajePrioridad.addEventListener("change", (e) => {
+    filtroFichajePrioridad = e.target.value;
+    renderFichajes();
+  });
+
+  selectFiltroFichajeEstado.addEventListener("change", (e) => {
+    filtroFichajeEstado = e.target.value;
+    renderFichajes();
+  });
+
+  btnVerTodosFichajes.addEventListener("click", () => {
+    filtroFichajePosicion = null;
+    filtroFichajePrioridad = "";
+    filtroFichajeEstado = "";
+    selectFiltroFichajePrioridad.value = "";
+    selectFiltroFichajeEstado.value = "";
+    renderFichajes();
   });
 
   // ==========================================

@@ -227,14 +227,164 @@
         </div>
       </div>
 
-      <!-- Panel 2: Fichajes Deseados (Placeholder) -->
+      <!-- Panel 2: Fichajes Deseados (CRUD Completo) -->
       <div id="tab-fichajes" class="tab-panel">
-        <div class="placeholder-panel">
-          <div class="placeholder-panel-icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <div class="squad-workspace">
+          
+          <!-- Lado Izquierdo: Formulario de Fichaje -->
+          <div class="squad-form-container">
+            <div class="panel-card">
+              <h3 id="form-fichaje-titulo">Agregar Fichaje Deseado</h3>
+              <form id="form-fichaje">
+                <input type="hidden" id="fichaje-id">
+                
+                <div class="form-grid-2">
+                  <div class="form-field">
+                    <label for="fichaje-nombre">Nombre</label>
+                    <input type="text" id="fichaje-nombre" class="form-control" placeholder="Ej. Nico Williams, Wirtz..." required autocomplete="off">
+                  </div>
+                  <div class="form-field">
+                    <label for="fichaje-club">Club Actual</label>
+                    <input type="text" id="fichaje-club" class="form-control" placeholder="Ej. Athletic Club, Leverkusen..." required autocomplete="off">
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label>Posiciones (Elige una o más)</label>
+                  <div class="positions-checkbox-grid">
+                    <!-- Checkboxes para las posiciones EA FC en Fichajes -->
+                    <label class="cb-label"><input type="checkbox" name="posicion-fichaje" value="GK"> GK</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion-fichaje" value="CB"> CB</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion-fichaje" value="LB"> LB</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion-fichaje" value="RB"> RB</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion-fichaje" value="LWB"> LWB</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion-fichaje" value="RWB"> RWB</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion-fichaje" value="CDM"> CDM</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion-fichaje" value="CM"> CM</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion-fichaje" value="CAM"> CAM</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion-fichaje" value="LM"> LM</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion-fichaje" value="RM"> RM</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion-fichaje" value="LW"> LW</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion-fichaje" value="RW"> RW</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion-fichaje" value="ST"> ST</label>
+                    <label class="cb-label"><input type="checkbox" name="posicion-fichaje" value="CF"> CF</label>
+                  </div>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="form-field">
+                    <label for="fichaje-edad">Edad</label>
+                    <input type="number" id="fichaje-edad" class="form-control" min="15" max="50" required>
+                  </div>
+                  <div class="form-field">
+                    <label for="fichaje-valormercado">Valor de Mercado Estimado (€)</label>
+                    <input type="number" id="fichaje-valormercado" class="form-control" min="0" placeholder="Ej. 60000000" required>
+                  </div>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="form-field">
+                    <label for="fichaje-valoracion">Valoración (OVR)</label>
+                    <input type="number" id="fichaje-valoracion" class="form-control" min="1" max="99" required>
+                  </div>
+                  <div class="form-field">
+                    <label for="fichaje-potencial">Potencial</label>
+                    <input type="number" id="fichaje-potencial" class="form-control" min="1" max="99" required>
+                  </div>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="form-field">
+                    <label for="fichaje-prioridad">Prioridad</label>
+                    <select id="fichaje-prioridad" class="form-control" required>
+                      <option value="Alta">Alta</option>
+                      <option value="Media">Media</option>
+                      <option value="Baja">Baja</option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label for="fichaje-estado">Estado</label>
+                    <select id="fichaje-estado" class="form-control" required>
+                      <option value="Pendiente">Pendiente</option>
+                      <option value="En negociación">En negociación</option>
+                      <option value="Fichado">Fichado</option>
+                      <option value="Descartado">Descartado</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label for="fichaje-notas">Notas</label>
+                  <textarea id="fichaje-notas" class="form-control" rows="3" placeholder="Cláusula de rescisión, salario pretendido, observaciones..."></textarea>
+                </div>
+
+                <div class="form-actions-row">
+                  <button type="button" id="btn-cancelar-fichaje" class="btn btn-secondary" style="display: none;">Cancelar Edición</button>
+                  <button type="submit" id="btn-guardar-fichaje" class="btn btn-primary">Guardar Fichaje</button>
+                </div>
+              </form>
+            </div>
           </div>
-          <h3>Fichajes Deseados</h3>
-          <p>La pestaña de seguimiento y negociación de fichajes estará disponible en la Fase 5.</p>
+
+          <!-- Lado Derecho: Listado de Fichajes -->
+          <div class="squad-list-container">
+            <div class="panel-card">
+              
+              <!-- Cabecera con Filtro Combinado -->
+              <div class="squad-list-header" style="flex-wrap: wrap; gap: 1rem;">
+                <h3>Fichajes en Carpeta</h3>
+                
+                <div class="filters-row" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                  <!-- Filtro Prioridad -->
+                  <select id="filtro-fichaje-prioridad" class="form-control" style="width: 140px; padding: 0.35rem 2rem 0.35rem 0.75rem; font-size: 0.8rem; background-position: right 0.5rem center;">
+                    <option value="">Prioridad: Todas</option>
+                    <option value="Alta">Prioridad: Alta</option>
+                    <option value="Media">Prioridad: Media</option>
+                    <option value="Baja">Prioridad: Baja</option>
+                  </select>
+                  
+                  <!-- Filtro Estado -->
+                  <select id="filtro-fichaje-estado" class="form-control" style="width: 140px; padding: 0.35rem 2rem 0.35rem 0.75rem; font-size: 0.8rem; background-position: right 0.5rem center;">
+                    <option value="">Estado: Todos</option>
+                    <option value="Pendiente">Estado: Pendiente</option>
+                    <option value="En negociación">Estado: En negoc.</option>
+                    <option value="Fichado">Estado: Fichado</option>
+                    <option value="Descartado">Estado: Descartado</option>
+                  </select>
+                  
+                  <button id="btn-ver-todos-fichajes" class="btn btn-secondary" style="display: none; padding: 0.35rem 0.8rem; font-size: 0.8rem;">Ver todos</button>
+                </div>
+              </div>
+
+              <!-- Resumen de Posiciones para Fichajes -->
+              <div id="posiciones-resumen-fichajes-container" class="positions-summary-container">
+                <!-- Generado dinámicamente -->
+              </div>
+
+              <div class="table-responsive">
+                <table class="squad-table">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Club Actual</th>
+                      <th>Posición</th>
+                      <th style="width: 65px; text-align: center;">OVR</th>
+                      <th style="width: 65px; text-align: center;">POT</th>
+                      <th style="width: 90px; text-align: right;">Estimado</th>
+                      <th style="width: 100px; text-align: center;">Prioridad</th>
+                      <th style="width: 120px; text-align: center;">Estado</th>
+                      <th style="width: 110px; text-align: right;">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="fichajes-tbody">
+                    <!-- Generado dinámicamente -->
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -303,6 +453,22 @@
       <div class="modal-footer">
         <button id="btn-cancelar-delete-jugador" class="btn btn-secondary">Conservar Jugador</button>
         <button id="btn-confirmar-delete-jugador" class="btn btn-danger">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Personalizado de Confirmación para Eliminar Fichaje -->
+  <div id="confirm-fichaje-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 class="modal-title" style="color: var(--danger);">¿Eliminar Fichaje Deseado?</h3>
+      <div class="modal-body">
+        <p style="color: var(--text-muted); font-size: 0.95rem;">¿Estás seguro de que deseas eliminar a <strong id="delete-fichaje-nombre" style="color: #fff;"></strong> de tu lista de seguimiento?</p>
+        <input type="hidden" id="delete-fichaje-equipo-id">
+        <input type="hidden" id="delete-fichaje-id">
+      </div>
+      <div class="modal-footer">
+        <button id="btn-cancelar-delete-fichaje" class="btn btn-secondary">Conservar</button>
+        <button id="btn-confirmar-delete-fichaje" class="btn btn-danger">Sí, eliminar</button>
       </div>
     </div>
   </div>

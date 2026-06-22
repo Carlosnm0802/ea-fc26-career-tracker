@@ -904,6 +904,65 @@ select.form-control {
   color: var(--secondary);
 }
 
+/* Badges de Fichajes */
+.priority-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+}
+
+.priority-alta {
+  background-color: rgba(255, 82, 82, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(255, 82, 82, 0.2);
+}
+
+.priority-media {
+  background-color: rgba(255, 170, 0, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(255, 170, 0, 0.2);
+}
+
+.priority-baja {
+  background-color: rgba(24, 255, 255, 0.1);
+  color: var(--secondary);
+  border: 1px solid rgba(24, 255, 255, 0.2);
+}
+
+.status-fichaje-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 30px;
+}
+
+.status-fichaje-pendiente {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+}
+
+.status-fichaje-negociacion {
+  background-color: rgba(255, 170, 0, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(255, 170, 0, 0.2);
+}
+
+.status-fichaje-fichado {
+  background-color: rgba(0, 230, 118, 0.1);
+  color: var(--primary);
+  border: 1px solid rgba(0, 230, 118, 0.2);
+}
+
+.status-fichaje-descartado {
+  background-color: rgba(255, 82, 82, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(255, 82, 82, 0.2);
+}
+
 .player-actions {
   display: flex;
   justify-content: flex-end;
