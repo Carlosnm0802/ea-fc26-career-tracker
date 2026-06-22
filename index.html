@@ -388,14 +388,89 @@
         </div>
       </div>
 
-      <!-- Panel 3: Información General (Placeholder) -->
+      <!-- Panel 3: Información General (CRUD Completo) -->
       <div id="tab-info" class="tab-panel">
-        <div class="placeholder-panel">
-          <div class="placeholder-panel-icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div class="squad-workspace">
+          
+          <!-- Lado Izquierdo: Datos Generales del Equipo -->
+          <div class="squad-form-container">
+            <div class="panel-card">
+              <h3>Datos del Club</h3>
+              <form id="form-info-general">
+                <div class="form-field">
+                  <label for="info-liga">División / Liga Actual</label>
+                  <input type="text" id="info-liga" class="form-control" placeholder="Ej. Premier League, LaLiga..." autocomplete="off">
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="form-field">
+                    <label for="info-presupuesto-transferencias">Presupuesto de Fichajes (€)</label>
+                    <input type="number" id="info-presupuesto-transferencias" class="form-control" min="0" placeholder="Ej. 120000000">
+                  </div>
+                  <div class="form-field">
+                    <label for="info-presupuesto-salarial">Presupuesto Salarial (€)</label>
+                    <input type="number" id="info-presupuesto-salarial" class="form-control" min="0" placeholder="Ej. 1500000">
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label for="info-objetivo-temporada">Objetivo de la Temporada</label>
+                  <textarea id="info-objetivo-temporada" class="form-control" rows="3" placeholder="Ej. Clasificar a Champions League, Ganar la copa..."></textarea>
+                </div>
+
+                <div class="form-field">
+                  <label for="info-objetivo-largo-plazo">Objetivo a Largo Plazo</label>
+                  <textarea id="info-objetivo-largo-plazo" class="form-control" rows="3" placeholder="Ej. Desarrollar jóvenes de la cantera y ganar el triplete en 5 años..."></textarea>
+                </div>
+
+                <div class="form-actions-row">
+                  <button type="submit" id="btn-guardar-info-general" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    Guardar cambios
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-          <h3>Información General y Bitácora</h3>
-          <p>Los objetivos de la temporada, presupuestos, reglas del save y bitácora estarán disponibles en la Fase 6.</p>
+
+          <!-- Lado Derecho: Reglas Propias y Bitácora -->
+          <div class="squad-list-container">
+            <!-- Sección 1: Reglas Propias -->
+            <div class="panel-card" style="margin-bottom: 1.5rem;">
+              <h3>Reglas del Save</h3>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Establece tus propias restricciones tácticas o financieras para hacer la carrera más realista.</p>
+              
+              <ul id="lista-reglas-propias" class="rules-list">
+                <!-- Generado dinámicamente -->
+              </ul>
+
+              <form id="form-agregar-regla" class="form-group-inline" style="margin-top: 1rem;">
+                <div class="form-control-wrapper">
+                  <input type="text" id="nueva-regla-texto" class="form-control" placeholder="Ej. Máximo 3 canteranos en el once..." required autocomplete="off">
+                </div>
+                <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1rem;">Agregar</button>
+              </form>
+            </div>
+
+            <!-- Sección 2: Bitácora de Notas -->
+            <div class="panel-card">
+              <h3>Bitácora de Notas</h3>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Anota partidos importantes, lesiones clave, hitos del save o notas rápidas de rendimiento.</p>
+
+              <form id="form-agregar-nota" class="form-group" style="margin-bottom: 1.5rem;">
+                <div class="form-field">
+                  <textarea id="nueva-nota-texto" class="form-control" rows="2" placeholder="Escribe aquí tu nota..." required></textarea>
+                </div>
+                <div style="display: flex; justify-content: flex-end;">
+                  <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Agregar nota</button>
+                </div>
+              </form>
+
+              <div id="feed-notas" class="notes-feed">
+                <!-- Generado dinámicamente -->
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -469,6 +544,23 @@
       <div class="modal-footer">
         <button id="btn-cancelar-delete-fichaje" class="btn btn-secondary">Conservar</button>
         <button id="btn-confirmar-delete-fichaje" class="btn btn-danger">Sí, eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Personalizado de Confirmación para Eliminar Nota -->
+  <div id="confirm-nota-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 class="modal-title" style="color: var(--danger);">¿Eliminar nota de la bitácora?</h3>
+      <div class="modal-body">
+        <p style="color: var(--text-muted); font-size: 0.95rem;">¿Estás seguro de que deseas eliminar esta nota permanentemente?</p>
+        <p id="delete-nota-preview" style="color: #fff; font-size: 0.85rem; font-style: italic; margin-top: 0.5rem; padding: 0.5rem; background: rgba(255,255,255,0.03); border-radius: 4px; border-left: 2px solid var(--danger);"></p>
+        <input type="hidden" id="delete-nota-equipo-id">
+        <input type="hidden" id="delete-nota-index">
+      </div>
+      <div class="modal-footer">
+        <button id="btn-cancelar-delete-nota" class="btn btn-secondary">Conservar</button>
+        <button id="btn-confirmar-delete-nota" class="btn btn-danger">Sí, eliminar</button>
       </div>
     </div>
   </div>

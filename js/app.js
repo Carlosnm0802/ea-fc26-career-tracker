@@ -179,6 +179,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCancelarDeleteFichaje = document.getElementById("btn-cancelar-delete-fichaje");
   const btnConfirmarDeleteFichaje = document.getElementById("btn-confirmar-delete-fichaje");
 
+  // Elementos DOM de Información General y Bitácora
+  const formInfoGeneral = document.getElementById("form-info-general");
+  const inputInfoLiga = document.getElementById("info-liga");
+  const inputInfoPresupuestoTransferencias = document.getElementById("info-presupuesto-transferencias");
+  const inputInfoPresupuestoSalarial = document.getElementById("info-presupuesto-salarial");
+  const inputInfoObjetivoTemporada = document.getElementById("info-objetivo-temporada");
+  const inputInfoObjetivoLargoPlazo = document.getElementById("info-objetivo-largo-plazo");
+
+  const listaReglasPropias = document.getElementById("lista-reglas-propias");
+  const formAgregarRegla = document.getElementById("form-agregar-regla");
+  const inputNuevaReglaTexto = document.getElementById("nueva-regla-texto");
+
+  const formAgregarNota = document.getElementById("form-agregar-nota");
+  const inputNuevaNotaTexto = document.getElementById("nueva-nota-texto");
+  const feedNotas = document.getElementById("feed-notas");
+
+  // Modal Delete Nota
+  const confirmNotaModal = document.getElementById("confirm-nota-modal");
+  const deleteNotaIndexInput = document.getElementById("delete-nota-index");
+  const deleteNotaEquipoIdInput = document.getElementById("delete-nota-equipo-id");
+  const deleteNotaPreviewDisplay = document.getElementById("delete-nota-preview");
+  const btnCancelarDeleteNota = document.getElementById("btn-cancelar-delete-nota");
+  const btnConfirmarDeleteNota = document.getElementById("btn-confirmar-delete-nota");
+
   // ==========================================
   // 1. CONTROL DE NAVEGACIÓN Y TABS
   // ==========================================
@@ -221,6 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
     resetFormularioFichaje();
     renderPlantilla();
     renderFichajes();
+    renderInfoGeneral();
   }
 
   /**
@@ -256,6 +281,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (activeBtn && activePanel) {
       activeBtn.classList.add("active");
       activePanel.classList.add("active");
+    }
+
+    if (tabId === "tab-info") {
+      renderInfoGeneral();
     }
   }
 
@@ -740,6 +769,7 @@ document.addEventListener("DOMContentLoaded", () => {
   btnCancelarDelete.addEventListener("click", cerrarModalConfirmacion);
   btnCancelarDeleteJugador.addEventListener("click", cerrarModalEliminarJugador);
   btnCancelarDeleteFichaje.addEventListener("click", cerrarModalEliminarFichaje);
+  btnCancelarDeleteNota.addEventListener("click", cerrarModalEliminarNota);
 
   // Cerrar modales haciendo click fuera del contenido
   window.addEventListener("click", (e) => {
@@ -747,6 +777,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target === confirmModal) cerrarModalConfirmacion();
     if (e.target === confirmJugadorModal) cerrarModalEliminarJugador();
     if (e.target === confirmFichajeModal) cerrarModalEliminarFichaje();
+    if (e.target === confirmNotaModal) cerrarModalEliminarNota();
   });
 
   // Exportar respaldo JSON
@@ -1001,6 +1032,239 @@ document.addEventListener("DOMContentLoaded", () => {
     selectFiltroFichajePrioridad.value = "";
     selectFiltroFichajeEstado.value = "";
     renderFichajes();
+  });
+
+  // ==========================================
+  // LÓGICA DE INFORMACIÓN GENERAL Y BITÁCORA
+  // ==========================================
+
+  /**
+   * Renderiza la información general del equipo abierto, incluyendo
+   * datos del club, reglas y bitácora.
+   */
+  function renderInfoGeneral() {
+    const equipo = getEquipoById(currentOpenTeamId);
+    if (!equipo) return;
+
+    const info = equipo.infoGeneral || {};
+
+    // Carga de campos del club (solo si no están activos)
+    if (document.activeElement !== inputInfoLiga) {
+      inputInfoLiga.value = info.divisionLiga || "";
+    }
+    if (document.activeElement !== inputInfoPresupuestoTransferencias) {
+      inputInfoPresupuestoTransferencias.value = info.presupuestoTransferencias !== undefined && info.presupuestoTransferencias !== 0 ? info.presupuestoTransferencias : "";
+    }
+    if (document.activeElement !== inputInfoPresupuestoSalarial) {
+      inputInfoPresupuestoSalarial.value = info.presupuestoSalarial !== undefined && info.presupuestoSalarial !== 0 ? info.presupuestoSalarial : "";
+    }
+    if (document.activeElement !== inputInfoObjetivoTemporada) {
+      inputInfoObjetivoTemporada.value = info.objetivoTemporada || "";
+    }
+    if (document.activeElement !== inputInfoObjetivoLargoPlazo) {
+      inputInfoObjetivoLargoPlazo.value = info.objetivoLargoPlazo || "";
+    }
+
+    // Renderizado de Reglas Propias
+    listaReglasPropias.innerHTML = "";
+    const reglas = info.reglasPropias || [];
+
+    if (reglas.length === 0) {
+      listaReglasPropias.innerHTML = `
+        <li style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem; text-align: center;">
+          No tienes ninguna regla agregada todavía.
+        </li>
+      `;
+    } else {
+      reglas.forEach((regla, index) => {
+        const li = document.createElement("li");
+        li.className = "rule-item";
+        li.innerHTML = `
+          <span class="rule-text">${regla}</span>
+          <button class="btn btn-danger btn-icon btn-eliminar-regla" data-index="${index}" title="Eliminar regla">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+          </button>
+        `;
+        
+        li.querySelector(".btn-eliminar-regla").addEventListener("click", () => {
+          eliminarReglaSave(index);
+        });
+
+        listaReglasPropias.appendChild(li);
+      });
+    }
+
+    // Renderizado de la Bitácora de Notas (orden descendente)
+    feedNotas.innerHTML = "";
+    const notas = info.notas || [];
+
+    if (notas.length === 0) {
+      feedNotas.innerHTML = `
+        <div style="color: var(--text-muted); font-size: 0.85rem; padding: 2rem 1rem; text-align: center;">
+          No hay notas en la bitácora todavía.
+        </div>
+      `;
+    } else {
+      const notasConIndices = notas.map((nota, index) => ({ nota, index }));
+      const notasOrdenadas = [...notasConIndices].reverse();
+
+      notasOrdenadas.forEach(({ nota, index }) => {
+        const card = document.createElement("div");
+        card.className = "note-card";
+        card.innerHTML = `
+          <div class="note-card-header">
+            <span class="note-date">${nota.fecha}</span>
+            <button class="btn btn-danger btn-icon btn-eliminar-nota" data-index="${index}" data-preview="${nota.texto.substring(0, 40)}" title="Eliminar nota">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            </button>
+          </div>
+          <div class="note-text">${nota.texto}</div>
+        `;
+
+        card.querySelector(".btn-eliminar-nota").addEventListener("click", () => {
+          const preview = card.querySelector(".btn-eliminar-nota").getAttribute("data-preview");
+          abrirModalEliminarNota(index, preview);
+        });
+
+        feedNotas.appendChild(card);
+      });
+    }
+  }
+
+  /**
+   * Guarda los datos generales en localStorage
+   */
+  formInfoGeneral.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const infoGeneralData = {
+      divisionLiga: inputInfoLiga.value.trim(),
+      presupuestoTransferencias: Number(inputInfoPresupuestoTransferencias.value),
+      presupuestoSalarial: Number(inputInfoPresupuestoSalarial.value),
+      objetivoTemporada: inputInfoObjetivoTemporada.value.trim(),
+      objetivoLargoPlazo: inputInfoObjetivoLargoPlazo.value.trim()
+    };
+
+    try {
+      actualizarInfoGeneral(currentOpenTeamId, infoGeneralData);
+      alert("Cambios guardados con éxito.");
+      renderInfoGeneral();
+      if (currentOpenTeamId === activeTeamId) {
+        seleccionarEquipo(activeTeamId);
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  });
+
+  /**
+   * Agrega una regla al save
+   */
+  formAgregarRegla.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const texto = inputNuevaReglaTexto.value.trim();
+    if (!texto) return;
+
+    const equipo = getEquipoById(currentOpenTeamId);
+    if (!equipo) return;
+
+    const info = equipo.infoGeneral || {};
+    const reglas = [...(info.reglasPropias || [])];
+    reglas.push(texto);
+
+    try {
+      actualizarInfoGeneral(currentOpenTeamId, { reglasPropias: reglas });
+      inputNuevaReglaTexto.value = "";
+      renderInfoGeneral();
+    } catch (error) {
+      alert(error.message);
+    }
+  });
+
+  /**
+   * Elimina una regla por su índice
+   */
+  function eliminarReglaSave(index) {
+    const equipo = getEquipoById(currentOpenTeamId);
+    if (!equipo) return;
+
+    const info = equipo.infoGeneral || {};
+    const reglas = [...(info.reglasPropias || [])];
+    reglas.splice(index, 1);
+
+    try {
+      actualizarInfoGeneral(currentOpenTeamId, { reglasPropias: reglas });
+      renderInfoGeneral();
+    } catch (error) {
+      alert(error.message);
+    }
+  }
+
+  /**
+   * Agrega una nota a la bitácora
+   */
+  formAgregarNota.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const texto = inputNuevaNotaTexto.value.trim();
+    if (!texto) return;
+
+    const equipo = getEquipoById(currentOpenTeamId);
+    if (!equipo) return;
+
+    const hoy = new Date();
+    const anio = hoy.getFullYear();
+    const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+    const dia = String(hoy.getDate()).padStart(2, "0");
+    const fechaStr = `${anio}-${mes}-${dia}`;
+
+    const info = equipo.infoGeneral || {};
+    const notas = [...(info.notas || [])];
+    notas.push({ fecha: fechaStr, texto: texto });
+
+    try {
+      actualizarInfoGeneral(currentOpenTeamId, { notas: notas });
+      inputNuevaNotaTexto.value = "";
+      renderInfoGeneral();
+    } catch (error) {
+      alert(error.message);
+    }
+  });
+
+  // Modal Confirmación Eliminar Nota
+  function abrirModalEliminarNota(index, preview) {
+    deleteNotaIndexInput.value = index;
+    deleteNotaEquipoIdInput.value = currentOpenTeamId;
+    deleteNotaPreviewDisplay.textContent = `"${preview}..."`;
+    confirmNotaModal.classList.add("active");
+  }
+
+  function cerrarModalEliminarNota() {
+    confirmNotaModal.classList.remove("active");
+    deleteNotaPreviewDisplay.textContent = "";
+    deleteNotaIndexInput.value = "";
+    deleteNotaEquipoIdInput.value = "";
+  }
+
+  btnConfirmarDeleteNota.addEventListener("click", () => {
+    const index = parseInt(deleteNotaIndexInput.value, 10);
+    const equipoId = deleteNotaEquipoIdInput.value;
+
+    if (!isNaN(index) && equipoId) {
+      const equipo = getEquipoById(equipoId);
+      if (equipo) {
+        const info = equipo.infoGeneral || {};
+        const notas = [...(info.notas || [])];
+        notas.splice(index, 1);
+
+        try {
+          actualizarInfoGeneral(equipoId, { notas: notas });
+          cerrarModalEliminarNota();
+          renderInfoGeneral();
+        } catch (error) {
+          alert(error.message);
+        }
+      }
+    }
   });
 
   // ==========================================

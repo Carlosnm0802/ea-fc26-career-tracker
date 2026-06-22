@@ -1050,3 +1050,85 @@ select.form-control {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* ==========================================
+   7. Estilos de pestaña Información General
+   ========================================== */
+.rules-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rule-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  gap: 1rem;
+}
+
+.rule-item:last-child {
+  border-bottom: none;
+}
+
+.rule-text {
+  font-size: 0.9rem;
+  color: #ffffff;
+  line-height: 1.4;
+}
+
+.notes-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.notes-feed::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notes-feed::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notes-feed::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.note-card {
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.note-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.note-date {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.05em;
+}
+
+.note-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
