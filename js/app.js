@@ -151,6 +151,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const selectFiltroFichajeEstado = document.getElementById("filtro-fichaje-estado");
   const buscarFichajeInput = document.getElementById("buscar-fichaje-nombre");
 
+  // Botones y Selectores CSV
+  const btnPlantillaCsvDescargar = document.getElementById("btn-plantilla-csv-descargar");
+  const inputPlantillaCsvImportar = document.getElementById("input-plantilla-csv-importar");
+  const btnFichajeCsvDescargar = document.getElementById("btn-fichaje-csv-descargar");
+  const inputFichajeCsvImportar = document.getElementById("input-fichaje-csv-importar");
+
   // ==========================================
   // ELEMENTOS DEL DOM - MODALES PERSONALIZADOS
   // ==========================================
@@ -1300,6 +1306,385 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
+
+  // ==========================================
+  // LÓGICA DE IMPORTACIÓN Y EXPORTACIÓN CSV
+  // ==========================================
+
+  /**
+   * Parsea una fila CSV carácter por carácter respetando las comas dentro de comillas dobles.
+   * @param {string} linea - La línea a parsear.
+   * @returns {Array} Array de celdas procesadas.
+   */
+  function parsearFilaCSV(linea) {
+    const celdas = [];
+    let dentroDeComillas = false;
+    let celdaActual = "";
+    
+    for (let i = 0; i < linea.length; i++) {
+      const char = linea[i];
+      
+      if (char === '"') {
+        dentroDeComillas = !dentroDeComillas;
+      } else if (char === ',' && !dentroDeComillas) {
+        celdas.push(celdaActual.trim());
+        celdaActual = "";
+      } else {
+        celdaActual += char;
+      }
+    }
+    celdas.push(celdaActual.trim());
+    return celdas;
+  }
+
+  /**
+   * Descarga la plantilla CSV vacía para plantilla de jugadores.
+   */
+  function descargarPlantillaPlantillaCSV() {
+    const headers = "nombre,posiciones,edad,nacionalidad,valoracion,potencial,valorMercado,estado,dorsal,contratoAniosRestantes,notas\n";
+    const ejemplo = 'Son Heung-min,LW|ST,31,"Corea, del Sur",87,87,50000000,Titular,7,2,"Capitán del equipo"\n';
+    
+    const blob = new Blob([headers + ejemplo], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "plantilla-jugadores-ejemplo.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Descarga la plantilla CSV vacía para fichajes deseados.
+   */
+  function descargarPlantillaFichajesCSV() {
+    const headers = "nombre,clubActual,posiciones,edad,valoracion,potencial,valorMercadoEstimado,prioridad,estado,notas\n";
+    const ejemplo = 'Nico Williams,Athletic Club,LW|RW,21,84,89,60000000,Alta,Pendiente,"Extremo veloz"\n';
+    
+    const blob = new Blob([headers + ejemplo], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "plantilla-fichajes-ejemplo.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Importa jugadores desde un archivo CSV.
+   * @param {File} archivo - Archivo CSV a procesar.
+   */
+  function importarJugadoresDesdeCSV(archivo) {
+    if (!archivo) return;
+    
+    const lector = new FileReader();
+    lector.onload = function(e) {
+      const contenido = e.target.result;
+      // Limpiar el BOM UTF-8 (\uFEFF) si existe
+      const textoLimpio = contenido.replace(/^\uFEFF/, "");
+      // Dividir por cualquier tipo de salto de línea (\r\n, \n, \r)
+      const lineas = textoLimpio.split(/\r\n|\n|\r/).filter(linea => linea.trim() !== "");
+      
+      if (lineas.length === 0) {
+        alert("El archivo CSV está vacío.");
+        return;
+      }
+      
+      let exitos = 0;
+      const errores = [];
+      
+      for (let i = 0; i < lineas.length; i++) {
+        const linea = lineas[i];
+        const celdas = parsearFilaCSV(linea);
+        
+        if (i === 0 && celdas[0].toLowerCase().trim() === "nombre") {
+          continue;
+        }
+        
+        if (celdas.length < 11) {
+          errores.push(`Fila ${i + 1}: Columnas incompletas (se esperaban 11, se obtuvieron ${celdas.length}).`);
+          continue;
+        }
+        
+        const nombre = celdas[0];
+        const posicionesStr = celdas[1];
+        const edadRaw = celdas[2];
+        const nacionalidad = celdas[3];
+        const valoracionRaw = celdas[4];
+        const potencialRaw = celdas[5];
+        const valorMercadoRaw = celdas[6];
+        const estado = celdas[7];
+        const dorsalRaw = celdas[8];
+        const contratoRaw = celdas[9];
+        const notas = celdas[10];
+        
+        if (!nombre) {
+          errores.push(`Fila ${i + 1}: El nombre del jugador no puede estar vacío.`);
+          continue;
+        }
+        
+        if (!posicionesStr) {
+          errores.push(`Fila ${i + 1}: El jugador debe tener al menos una posición.`);
+          continue;
+        }
+        
+        const posiciones = posicionesStr.split("|").map(pos => pos.trim().toUpperCase());
+        const posicionesValidas = ["GK", "CB", "LB", "RB", "LWB", "RWB", "CDM", "CM", "CAM", "LM", "RM", "LW", "RW", "ST", "CF"];
+        let posicionInvalida = false;
+        
+        for (const pos of posiciones) {
+          if (!posicionesValidas.includes(pos)) {
+            errores.push(`Fila ${i + 1}: Posición no válida "${pos}".`);
+            posicionInvalida = true;
+            break;
+          }
+        }
+        if (posicionInvalida) continue;
+        
+        let estadoNormalizado = estado ? estado.trim() : "";
+        const estadoLower = estadoNormalizado.toLowerCase();
+        if (estadoLower === "titular") {
+          estadoNormalizado = "Titular";
+        } else if (estadoLower === "suplente") {
+          estadoNormalizado = "Suplente";
+        } else if (estadoLower === "rotacion" || estadoLower === "rotación") {
+          estadoNormalizado = "Rotación";
+        }
+
+        const estadosValidos = ["Titular", "Suplente", "Rotación"];
+        if (!estadosValidos.includes(estadoNormalizado)) {
+          errores.push(`Fila ${i + 1}: Estado no válido "${estado}". Debe ser: Titular, Suplente o Rotación.`);
+          continue;
+        }
+        
+        const edad = edadRaw ? Number(edadRaw) : 0;
+        const valoracion = valoracionRaw ? Number(valoracionRaw) : 0;
+        const potencial = potencialRaw ? Number(potencialRaw) : 0;
+        const valorMercado = valorMercadoRaw ? Number(valorMercadoRaw) : 0;
+        const dorsal = dorsalRaw ? Number(dorsalRaw) : 0;
+        const contratoAniosRestantes = contratoRaw ? Number(contratoRaw) : 0;
+        
+        const jugadorData = {
+          nombre,
+          posiciones,
+          edad,
+          nacionalidad,
+          valoracion,
+          potencial,
+          valorMercado,
+          estado: estadoNormalizado,
+          dorsal,
+          contratoAniosRestantes,
+          notas
+        };
+        
+        try {
+          agregarJugador(currentOpenTeamId, jugadorData);
+          exitos++;
+        } catch (error) {
+          errores.push(`Fila ${i + 1}: ${error.message}`);
+        }
+      }
+      
+      let mensaje = `Importación de Plantilla completada.\n- Se importaron con éxito ${exitos} jugadores.`;
+      if (errores.length > 0) {
+        mensaje += `\n- ${errores.length} filas fueron ignoradas por errores:\n` + errores.map(e => `  * ${e}`).join("\n");
+      }
+      alert(mensaje);
+      
+      inputPlantillaCsvImportar.value = "";
+      
+      // Limpiar filtros para que el usuario vea los nuevos jugadores inmediatamente
+      filtroPosicionActivo = null;
+      buscarPlantillaNombre = "";
+      if (buscarJugadorInput) buscarJugadorInput.value = "";
+
+      renderPlantilla();
+    };
+    
+    lector.readAsText(archivo);
+  }
+
+  /**
+   * Importa fichajes deseados desde un archivo CSV.
+   * @param {File} archivo - Archivo CSV a procesar.
+   */
+  function importarFichajesDesdeCSV(archivo) {
+    if (!archivo) return;
+    
+    const lector = new FileReader();
+    lector.onload = function(e) {
+      const contenido = e.target.result;
+      // Limpiar el BOM UTF-8 (\uFEFF) si existe
+      const textoLimpio = contenido.replace(/^\uFEFF/, "");
+      // Dividir por cualquier tipo de salto de línea (\r\n, \n, \r)
+      const lineas = textoLimpio.split(/\r\n|\n|\r/).filter(linea => linea.trim() !== "");
+      
+      if (lineas.length === 0) {
+        alert("El archivo CSV está vacío.");
+        return;
+      }
+      
+      let exitos = 0;
+      const errores = [];
+      
+      for (let i = 0; i < lineas.length; i++) {
+        const linea = lineas[i];
+        const celdas = parsearFilaCSV(linea);
+        
+        if (i === 0 && celdas[0].toLowerCase().trim() === "nombre") {
+          continue;
+        }
+        
+        if (celdas.length < 10) {
+          errores.push(`Fila ${i + 1}: Columnas incompletas (se esperaban 10, se obtuvieron ${celdas.length}).`);
+          continue;
+        }
+        
+        const nombre = celdas[0];
+        const clubActual = celdas[1];
+        const posicionesStr = celdas[2];
+        const edadRaw = celdas[3];
+        const valoracionRaw = celdas[4];
+        const potencialRaw = celdas[5];
+        const valorMercadoEstimadoRaw = celdas[6];
+        const prioridad = celdas[7];
+        const estado = celdas[8];
+        const notas = celdas[9];
+        
+        if (!nombre) {
+          errores.push(`Fila ${i + 1}: El nombre del fichaje no puede estar vacío.`);
+          continue;
+        }
+        
+        if (!clubActual) {
+          errores.push(`Fila ${i + 1}: El club actual no puede estar vacío.`);
+          continue;
+        }
+        
+        if (!posicionesStr) {
+          errores.push(`Fila ${i + 1}: El fichaje debe tener al menos una posición.`);
+          continue;
+        }
+        
+        const posiciones = posicionesStr.split("|").map(pos => pos.trim().toUpperCase());
+        const posicionesValidas = ["GK", "CB", "LB", "RB", "LWB", "RWB", "CDM", "CM", "CAM", "LM", "RM", "LW", "RW", "ST", "CF"];
+        let posicionInvalida = false;
+        
+        for (const pos of posiciones) {
+          if (!posicionesValidas.includes(pos)) {
+            errores.push(`Fila ${i + 1}: Posición no válida "${pos}".`);
+            posicionInvalida = true;
+            break;
+          }
+        }
+        if (posicionInvalida) continue;
+        
+        let prioridadNormalizada = prioridad ? prioridad.trim() : "";
+        const prioridadLower = prioridadNormalizada.toLowerCase();
+        if (prioridadLower === "alta") {
+          prioridadNormalizada = "Alta";
+        } else if (prioridadLower === "media") {
+          prioridadNormalizada = "Media";
+        } else if (prioridadLower === "baja") {
+          prioridadNormalizada = "Baja";
+        }
+
+        const prioridadesValidas = ["Alta", "Media", "Baja"];
+        if (!prioridadesValidas.includes(prioridadNormalizada)) {
+          errores.push(`Fila ${i + 1}: Prioridad no válida "${prioridad}". Debe ser: Alta, Media o Baja.`);
+          continue;
+        }
+        
+        let estadoNormalizado = estado ? estado.trim() : "";
+        const estadoLower = estadoNormalizado.toLowerCase();
+        if (estadoLower === "pendiente") {
+          estadoNormalizado = "Pendiente";
+        } else if (estadoLower === "en negociacion" || estadoLower === "en negociación") {
+          estadoNormalizado = "En negociación";
+        } else if (estadoLower === "fichado") {
+          estadoNormalizado = "Fichado";
+        } else if (estadoLower === "descartado") {
+          estadoNormalizado = "Descartado";
+        }
+
+        const estadosValidos = ["Pendiente", "En negociación", "Fichado", "Descartado"];
+        if (!estadosValidos.includes(estadoNormalizado)) {
+          errores.push(`Fila ${i + 1}: Estado no válido "${estado}". Debe ser: Pendiente, En negociación, Fichado o Descartado.`);
+          continue;
+        }
+        
+        const edad = edadRaw ? Number(edadRaw) : 0;
+        const valoracion = valoracionRaw ? Number(valoracionRaw) : 0;
+        const potencial = potencialRaw ? Number(potencialRaw) : 0;
+        const valorMercadoEstimado = valorMercadoEstimadoRaw ? Number(valorMercadoEstimadoRaw) : 0;
+        
+        const fichajeData = {
+          nombre,
+          clubActual,
+          posiciones,
+          edad,
+          valoracion,
+          potencial,
+          valorMercadoEstimado,
+          prioridad: prioridadNormalizada,
+          estado: estadoNormalizado,
+          notas
+        };
+        
+        try {
+          agregarFichajeDeseado(currentOpenTeamId, fichajeData);
+          exitos++;
+        } catch (error) {
+          errores.push(`Fila ${i + 1}: ${error.message}`);
+        }
+      }
+      
+      let mensaje = `Importación de Fichajes completada.\n- Se importaron con éxito ${exitos} fichajes.`;
+      if (errores.length > 0) {
+        mensaje += `\n- ${errores.length} filas fueron ignoradas por errores:\n` + errores.map(e => `  * ${e}`).join("\n");
+      }
+      alert(mensaje);
+      
+      inputFichajeCsvImportar.value = "";
+      
+      // Limpiar filtros para que el usuario vea los nuevos fichajes inmediatamente
+      filtroFichajePosicion = null;
+      filtroFichajePrioridad = "";
+      filtroFichajeEstado = "";
+      buscarFichajeNombre = "";
+      if (buscarFichajeInput) buscarFichajeInput.value = "";
+      if (selectFiltroFichajePrioridad) selectFiltroFichajePrioridad.value = "";
+      if (selectFiltroFichajeEstado) selectFiltroFichajeEstado.value = "";
+
+      renderFichajes();
+    };
+    
+    lector.readAsText(archivo);
+  }
+
+  // Descarga de plantillas CSV
+  if (btnPlantillaCsvDescargar) {
+    btnPlantillaCsvDescargar.addEventListener("click", descargarPlantillaPlantillaCSV);
+  }
+  if (btnFichajeCsvDescargar) {
+    btnFichajeCsvDescargar.addEventListener("click", descargarPlantillaFichajesCSV);
+  }
+
+  // Carga e Importación desde Archivos CSV
+  if (inputPlantillaCsvImportar) {
+    inputPlantillaCsvImportar.addEventListener("change", (e) => {
+      importarJugadoresDesdeCSV(e.target.files[0]);
+    });
+  }
+  if (inputFichajeCsvImportar) {
+    inputFichajeCsvImportar.addEventListener("change", (e) => {
+      importarFichajesDesdeCSV(e.target.files[0]);
+    });
+  }
 
   // ==========================================
   // 7. INICIALIZACIÓN
