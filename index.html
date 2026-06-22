@@ -193,9 +193,12 @@
           <!-- Lado Derecho: Listado de Jugadores -->
           <div class="squad-list-container">
             <div class="panel-card">
-              <div class="squad-list-header">
+              <div class="squad-list-header" style="flex-wrap: wrap; gap: 1rem;">
                 <h3>Plantilla Actual</h3>
-                <button id="btn-ver-todos" class="btn btn-secondary" style="display: none; padding: 0.35rem 0.8rem; font-size: 0.8rem;">Ver todos</button>
+                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                  <input type="search" id="buscar-jugador-nombre" class="form-control" placeholder="Buscar jugador por nombre..." style="width: 200px; padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+                  <button id="btn-ver-todos" class="btn btn-secondary" style="display: none; padding: 0.35rem 0.8rem; font-size: 0.8rem;">Ver todos</button>
+                </div>
               </div>
               
               <div id="posiciones-resumen-container" class="positions-summary-container">
@@ -335,6 +338,9 @@
                 <h3>Fichajes en Carpeta</h3>
                 
                 <div class="filters-row" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                  <!-- Buscador por nombre -->
+                  <input type="search" id="buscar-fichaje-nombre" class="form-control" placeholder="Buscar por nombre..." style="width: 180px; padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+                  
                   <!-- Filtro Prioridad -->
                   <select id="filtro-fichaje-prioridad" class="form-control" style="width: 140px; padding: 0.35rem 2rem 0.35rem 0.75rem; font-size: 0.8rem; background-position: right 0.5rem center;">
                     <option value="">Prioridad: Todas</option>

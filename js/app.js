@@ -70,6 +70,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let filtroFichajePrioridad = "";
   let filtroFichajeEstado = "";
 
+  // Estados de búsqueda por nombre
+  let buscarPlantillaNombre = "";
+  let buscarFichajeNombre = "";
+
   // ==========================================
   // ELEMENTOS DEL DOM - GENERALES Y NAVEGACIÓN
   // ==========================================
@@ -118,6 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCancelarJugador = document.getElementById("btn-cancelar-jugador");
   const btnGuardarJugador = document.getElementById("btn-guardar-jugador");
   const plantillaTbody = document.getElementById("plantilla-tbody");
+  const buscarJugadorInput = document.getElementById("buscar-jugador-nombre");
 
   // ==========================================
   // ELEMENTOS DEL DOM - CRUD DE FICHAJES DESEADOS
@@ -144,6 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnVerTodosFichajes = document.getElementById("btn-ver-todos-fichajes");
   const selectFiltroFichajePrioridad = document.getElementById("filtro-fichaje-prioridad");
   const selectFiltroFichajeEstado = document.getElementById("filtro-fichaje-estado");
+  const buscarFichajeInput = document.getElementById("buscar-fichaje-nombre");
 
   // ==========================================
   // ELEMENTOS DEL DOM - MODALES PERSONALIZADOS
@@ -237,8 +243,12 @@ document.addEventListener("DOMContentLoaded", () => {
     filtroFichajePosicion = null;
     filtroFichajePrioridad = "";
     filtroFichajeEstado = "";
+    buscarFichajeNombre = "";
+    buscarPlantillaNombre = "";
     if (selectFiltroFichajePrioridad) selectFiltroFichajePrioridad.value = "";
     if (selectFiltroFichajeEstado) selectFiltroFichajeEstado.value = "";
+    if (buscarJugadorInput) buscarJugadorInput.value = "";
+    if (buscarFichajeInput) buscarFichajeInput.value = "";
 
     // Limpiar formulario y renderizar la plantilla actual del club
     resetFormularioJugador();
@@ -468,22 +478,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Controlar visibilidad del botón "Ver todos"
-    if (filtroPosicionActivo) {
+    if (filtroPosicionActivo || buscarPlantillaNombre) {
       btnVerTodos.style.display = "inline-flex";
     } else {
       btnVerTodos.style.display = "none";
     }
 
-    // Filtrar jugadores según la posición activa
+    // Filtrar jugadores según la posición activa y el buscador por nombre
     let jugadoresFiltrados = [...jugadores];
     if (filtroPosicionActivo) {
-      jugadoresFiltrados = jugadores.filter(j => j.posiciones && j.posiciones.includes(filtroPosicionActivo));
+      jugadoresFiltrados = jugadoresFiltrados.filter(j => j.posiciones && j.posiciones.includes(filtroPosicionActivo));
+    }
+    if (buscarPlantillaNombre) {
+      const query = buscarPlantillaNombre.toLowerCase().trim();
+      jugadoresFiltrados = jugadoresFiltrados.filter(j => j.nombre && j.nombre.toLowerCase().includes(query));
     }
 
     if (jugadoresFiltrados.length === 0) {
-      const msg = filtroPosicionActivo
-        ? `No hay jugadores registrados en la posición ${filtroPosicionActivo}.`
-        : "No hay jugadores registrados en la plantilla. ¡Agrégalos usando el formulario de la izquierda!";
+      const msg = jugadores.length === 0
+        ? "No hay jugadores registrados en la plantilla. ¡Agrégalos usando el formulario de la izquierda!"
+        : "No se encontraron jugadores con ese criterio.";
       
       plantillaTbody.innerHTML = `
         <tr>
@@ -788,6 +802,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Limpiar filtro de posiciones
   btnVerTodos.addEventListener("click", () => {
     filtroPosicionActivo = null;
+    buscarPlantillaNombre = "";
+    buscarJugadorInput.value = "";
+    renderPlantilla();
+  });
+
+  // Evento de búsqueda por nombre en Plantilla
+  buscarJugadorInput.addEventListener("input", (e) => {
+    buscarPlantillaNombre = e.target.value;
     renderPlantilla();
   });
 
@@ -814,7 +836,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Controlar visibilidad del botón "Ver todos" en fichajes
-    const algunFiltroActivo = filtroFichajePosicion || filtroFichajePrioridad || filtroFichajeEstado;
+    const algunFiltroActivo = filtroFichajePosicion || filtroFichajePrioridad || filtroFichajeEstado || buscarFichajeNombre;
     if (algunFiltroActivo) {
       btnVerTodosFichajes.style.display = "inline-flex";
     } else {
@@ -833,12 +855,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (filtroFichajeEstado) {
       filtered = filtered.filter(f => f.estado === filtroFichajeEstado);
     }
+    if (buscarFichajeNombre) {
+      const query = buscarFichajeNombre.toLowerCase().trim();
+      filtered = filtered.filter(f => f.nombre && f.nombre.toLowerCase().includes(query));
+    }
 
     if (filtered.length === 0) {
-      let msg = "No hay fichajes en carpeta con los filtros seleccionados.";
-      if (fichajes.length === 0) {
-        msg = "No hay fichajes en tu carpeta de seguimiento. ¡Agrégalos usando el formulario de la izquierda!";
-      }
+      const msg = fichajes.length === 0
+        ? "No hay fichajes en tu carpeta de seguimiento. ¡Agrégalos usando el formulario de la izquierda!"
+        : "No se encontraron jugadores con ese criterio.";
+      
       fichajesTbody.innerHTML = `
         <tr>
           <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">
@@ -1029,8 +1055,16 @@ document.addEventListener("DOMContentLoaded", () => {
     filtroFichajePosicion = null;
     filtroFichajePrioridad = "";
     filtroFichajeEstado = "";
+    buscarFichajeNombre = "";
     selectFiltroFichajePrioridad.value = "";
     selectFiltroFichajeEstado.value = "";
+    buscarFichajeInput.value = "";
+    renderFichajes();
+  });
+
+  // Evento de búsqueda por nombre en Fichajes
+  buscarFichajeInput.addEventListener("input", (e) => {
+    buscarFichajeNombre = e.target.value;
     renderFichajes();
   });
 
