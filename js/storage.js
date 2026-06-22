@@ -587,23 +587,25 @@ function exportarStorageJSON() {
     return;
   }
 
-  // Validamos que sea un JSON bien estructurado
+  // Validamos que sea un JSON bien estructurado e indentamos a 2 espacios
+  let formattedData;
   try {
-    JSON.parse(rawData);
+    const parsed = JSON.parse(rawData);
+    formattedData = JSON.stringify(parsed, null, 2);
   } catch (error) {
     console.error("El formato de los datos es inválido.");
     alert("Los datos guardados no son válidos para la exportación.");
     return;
   }
 
-  const blob = new Blob([rawData], { type: "application/json" });
+  const blob = new Blob([formattedData], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   
   const a = document.createElement("a");
   a.href = url;
   
   const fechaStr = new Date().toISOString().slice(0, 10);
-  a.download = `fc26_career_tracker_backup_${fechaStr}.json`;
+  a.download = `fc26-career-tracker-backup-${fechaStr}.json`;
   
   document.body.appendChild(a);
   a.click();
@@ -611,6 +613,7 @@ function exportarStorageJSON() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   console.log("Archivo JSON de respaldo descargado con éxito.");
+  alert("El respaldo se ha descargado correctamente en tu equipo.");
 }
 
 // Inicialización automática al cargar el script en el entorno del navegador
