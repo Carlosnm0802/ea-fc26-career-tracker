@@ -613,7 +613,6 @@ function exportarStorageJSON() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   console.log("Archivo JSON de respaldo descargado con éxito.");
-  alert("El respaldo se ha descargado correctamente en tu equipo.");
 }
 
 // Inicialización automática al cargar el script en el entorno del navegador

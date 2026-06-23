@@ -1,46 +1,43 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
-
 /* ==========================================
-   1. Diseño del Sistema de Tokens (CSS Variables)
+   1. VARIABLES CSS Y SISTEMA DE DISEÑO (DESIGN SYSTEM & VARIABLES)
    ========================================== */
 :root {
-  /* Paleta de Colores (Modo Oscuro Premium) */
-  --bg-primary: #07090e;
-  --bg-secondary: #0d111b;
-  --bg-card: rgba(19, 26, 42, 0.75);
-  --border-color: rgba(255, 255, 255, 0.06);
-  --border-hover: rgba(0, 230, 118, 0.25);
-  
-  /* Acentos EA FC */
-  --primary: #00e676; /* Verde Neón / Eléctrico */
-  --primary-hover: #00b359;
-  --primary-glow: rgba(0, 230, 118, 0.2);
-  --secondary: #18ffff; /* Azul Eléctrico */
-  --accent: #ffaa00; /* Oro */
-  --danger: #ff5252; /* Rojo Destructivo */
-  --danger-hover: #e04040;
-  --danger-glow: rgba(255, 82, 82, 0.2);
-  
-  /* Texto */
-  --text-main: #f3f4f6;
-  --text-muted: #8b9bb4;
-  --text-inverse: #07090e;
+  --color-bg-base: #0D0D0D;         /* Fondo principal */
+  --color-bg-surface: #161616;      /* Tarjetas y paneles */
+  --color-bg-elevated: #1F1F1F;     /* Modales y elementos flotantes */
+  --color-accent: #00FF87;          /* Verde neón — Acento principal */
+  --color-accent-dim: #00C46A;      /* Acento hover / secundario */
+  --color-text-primary: #F0F0F0;    /* Texto principal */
+  --color-text-secondary: #8A8A8A;  /* Texto de apoyo y placeholders */
+  --color-border: #2A2A2A;          /* Bordes sutiles */
+  --color-danger: #FF4D4D;          /* Eliminaciones y errores */
+  --color-warning: #FFB020;         /* Prioridad media, alertas */
+  --color-success: #00FF87;         /* Confirmaciones y estado Titular */
 
-  /* Fuentes y Bordes */
-  --font-sans: 'Outfit', sans-serif;
+  /* Fuentes y tipografía */
+  --font-display: 'Rajdhani', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Bordes */
   --radius-lg: 16px;
-  --radius-md: 12px;
-  --radius-sm: 8px;
-  
-  /* Sombras y Efectos */
-  --shadow-lg: 0 16px 40px -10px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 20px rgba(0, 230, 118, 0.15);
-  --transition-all: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  --glass-blur: blur(12px);
+  --radius-md: 10px;
+  --radius-sm: 6px;
+
+  /* Sombras y efectos */
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.85);
+  --shadow-glow: 0 0 20px rgba(0, 255, 135, 0.2);
+
+  /* Transiciones */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  --glass-blur: blur(16px);
 }
 
 /* ==========================================
-   2. Reset y Estilos Globales
+   2. RESET Y REGLAS BÁSICAS (RESET & GLOBAL STYLES)
    ========================================== */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -49,25 +46,25 @@
 }
 
 body {
-  font-family: var(--font-sans);
-  background-color: var(--bg-primary);
-  color: var(--text-main);
+  font-family: var(--font-body);
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
   line-height: 1.5;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
-  padding: 2rem 1rem;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Fondos Decorativos y de Ambiente (Rich Aesthetics) */
+/* Decoraciones de Fondo (Rich Aesthetics) */
 body::before {
   content: '';
   position: absolute;
-  top: -10%;
+  top: -15%;
   right: -10%;
-  width: 45vw;
-  height: 45vw;
-  background: radial-gradient(circle, rgba(0, 230, 118, 0.05) 0%, transparent 70%);
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, rgba(0, 255, 135, 0.04) 0%, transparent 70%);
   z-index: -1;
   pointer-events: none;
 }
@@ -75,42 +72,207 @@ body::before {
 body::after {
   content: '';
   position: absolute;
-  bottom: -10%;
+  bottom: -15%;
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: radial-gradient(circle, rgba(24, 255, 255, 0.04) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(0, 196, 106, 0.03) 0%, transparent 70%);
   z-index: -1;
   pointer-events: none;
 }
 
-/* Contenedor Principal */
-.app-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
+/* Personalización de Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
 }
 
 /* ==========================================
-   3. Estilos de Componentes
+   3. TIPOGRAFÍA Y ESTILOS DE TEXTO (TYPOGRAPHY & FONT RULES)
    ========================================== */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #FFFFFF;
+}
 
-/* Cabecera Principal */
+p {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-accent-dim);
+}
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.number-stat {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #FFFFFF;
+}
+
+/* ==========================================
+   4. BOTONES Y ELEMENTOS INTERACTIVOS (BUTTONS & INTERACTIVE CONTROLS)
+   ========================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  user-select: none;
+  min-height: 44px; /* Touch target standard */
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--color-accent);
+  color: var(--color-bg-base);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-accent-dim);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-text-secondary);
+  color: #FFFFFF;
+}
+
+.btn-danger {
+  background-color: rgba(255, 77, 77, 0.1);
+  border-color: rgba(255, 77, 77, 0.2);
+  color: var(--color-danger);
+}
+
+.btn-danger:hover {
+  background-color: var(--color-danger);
+  color: #FFFFFF;
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(255, 77, 77, 0.3);
+}
+
+.btn-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Inputs y Selects */
+.form-control {
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  transition: var(--transition-fast);
+  min-height: 44px;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 8px rgba(0, 255, 135, 0.2);
+}
+
+.form-control::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238A8A8A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+  padding-right: 2.5rem;
+}
+
+/* ==========================================
+   5. CONTENEDOR PRINCIPAL, CABECERA Y PIE DE PÁGINA (MAIN LAYOUT STRUCTURE & HEADER/FOOTER)
+   ========================================== */
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
 .app-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2.5rem;
-  border-bottom: 1px solid var(--border-color);
   padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  gap: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .brand-section h1 {
-  font-size: 2.2rem;
+  font-size: 2.4rem;
   font-weight: 800;
   letter-spacing: -0.5px;
-  background: linear-gradient(135deg, #ffffff 30%, var(--text-muted) 100%);
+  background: linear-gradient(135deg, #FFFFFF 40%, var(--color-text-secondary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   display: flex;
@@ -119,196 +281,137 @@ body::after {
 }
 
 .brand-section h1 span {
-  color: var(--primary);
+  color: var(--color-accent);
   -webkit-text-fill-color: initial;
 }
 
 .brand-section p {
-  color: var(--text-muted);
   font-size: 0.95rem;
+  font-weight: 400;
   margin-top: 0.25rem;
-  font-weight: 300;
 }
 
-/* Pizarra Táctica de Save Activo */
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.app-footer {
+  text-align: center;
+  color: var(--color-text-secondary);
+  margin-top: 6rem;
+  padding: 2.5rem 0;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.app-footer p {
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* ==========================================
+   6. ACTIVE TACTICAL BANNER (TACTICAL BOARD)
+   ========================================== */
 .active-save-banner {
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 }
 
 .tactical-board {
-  background: linear-gradient(135deg, rgba(16, 22, 38, 0.85) 0%, rgba(8, 12, 22, 0.9) 100%);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px dashed rgba(0, 230, 118, 0.35);
+  background: linear-gradient(135deg, rgba(22, 22, 22, 0.95) 0%, rgba(13, 13, 13, 0.95) 100%);
+  border: 1.5px dashed rgba(0, 255, 135, 0.25);
   border-radius: var(--radius-lg);
-  padding: 1.75rem 2rem;
-  box-shadow: 0 10px 30px rgba(0, 230, 118, 0.05);
+  padding: 1.5rem 2rem;
+  box-shadow: var(--shadow-md);
   position: relative;
-  transition: var(--transition-all);
+  transition: var(--transition-normal);
+}
+
+.tactical-board::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0, 255, 135, 0.015) 0%, transparent 100%);
+  border-radius: var(--radius-lg);
+  pointer-events: none;
 }
 
 .tactical-board.active {
-  border: 1.5px solid var(--primary);
-  box-shadow: 0 10px 30px rgba(0, 230, 118, 0.08), 0 0 15px rgba(0, 230, 118, 0.05);
+  border: 1.5px solid var(--color-accent);
+  box-shadow: var(--shadow-glow), var(--shadow-md);
 }
 
 .tactical-tag {
   display: inline-block;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--primary);
-  background-color: rgba(0, 230, 118, 0.1);
-  padding: 0.35rem 0.8rem;
+  font-family: var(--font-display);
+  color: var(--color-accent);
+  background-color: rgba(0, 255, 135, 0.1);
+  padding: 0.3rem 0.8rem;
   border-radius: 50px;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-bottom: 0.75rem;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
 }
 
 .tactical-board h2 {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 0.25rem;
+  font-size: 1.8rem;
+  margin-bottom: 0.35rem;
 }
 
 .tactical-board p {
   font-size: 0.95rem;
-  color: var(--text-muted);
-  font-weight: 300;
+  color: var(--color-text-secondary);
 }
 
-/* Botones */
-.btn {
-  font-family: var(--font-sans);
-  font-size: 0.95rem;
-  font-weight: 600;
-  padding: 0.6rem 1.2rem;
-  border-radius: var(--radius-sm);
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: var(--transition-all);
-  text-decoration: none;
-}
-
-.btn-primary {
-  background-color: var(--primary);
-  color: var(--text-inverse);
-}
-
-.btn-primary:hover {
-  background-color: var(--primary-hover);
-  box-shadow: 0 0 15px rgba(0, 230, 118, 0.4);
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background-color: transparent;
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-}
-
-.btn-secondary:hover {
-  border-color: var(--text-muted);
-  background-color: rgba(255, 255, 255, 0.03);
-}
-
-.btn-danger {
-  background-color: rgba(255, 82, 82, 0.08);
-  border: 1px solid rgba(255, 82, 82, 0.15);
-  color: var(--danger);
-}
-
-.btn-danger:hover {
-  background-color: var(--danger);
-  color: var(--text-inverse);
-  box-shadow: var(--danger-glow);
-}
-
-.btn-icon {
-  padding: 0.5rem;
-  border-radius: 50%;
-  aspect-ratio: 1;
-}
-
-/* Formulario de Creación (Dashboard) */
+/* ==========================================
+   7. DASHBOARD & TEAM SELECTOR CARDS
+   ========================================== */
 .creator-card {
-  background-color: var(--bg-card);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border-color);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 1.5rem 2rem;
   margin-bottom: 3rem;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .creator-card h2 {
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: 1.3rem;
   margin-bottom: 1.25rem;
+  color: #FFFFFF;
 }
 
-.form-group-inline {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.form-control-wrapper {
-  flex: 1;
-  min-width: 250px;
-}
-
-.form-control {
-  width: 100%;
-  background-color: rgba(13, 17, 27, 0.85);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 0.75rem 1rem;
-  color: var(--text-main);
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  transition: var(--transition-all);
-}
-
-.form-control:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 10px rgba(0, 230, 118, 0.15);
-}
-
-.form-control::placeholder {
-  color: #5d6d84;
-}
-
-select.form-control {
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238b9bb4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  background-size: 1rem;
-  padding-right: 2.5rem;
-}
-
-/* Grid de Equipos */
 .section-title {
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: 1.5rem;
   margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .section-title::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, var(--border-color), transparent);
+  background: linear-gradient(90deg, var(--color-border), transparent);
 }
 
 .equipos-grid {
@@ -318,23 +421,20 @@ select.form-control {
   margin-bottom: 3rem;
 }
 
-/* Tarjeta de Equipo (Glassmorphism + Premium Aesth) */
 .team-card {
-  background-color: var(--bg-card);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border-color);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 1.5rem 1.75rem;
-  box-shadow: var(--shadow-lg);
-  transition: var(--transition-all);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-normal);
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 200px;
-  overflow: hidden;
+  min-height: 190px;
   cursor: pointer;
+  overflow: hidden;
 }
 
 .team-card::before {
@@ -344,66 +444,64 @@ select.form-control {
   left: 0;
   width: 4px;
   height: 100%;
-  background-color: var(--text-muted);
-  opacity: 0.3;
-  transition: var(--transition-all);
+  background-color: var(--color-text-secondary);
+  opacity: 0.25;
+  transition: var(--transition-fast);
 }
 
 .team-card:hover {
   transform: translateY(-4px);
   border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8);
+  box-shadow: var(--shadow-lg);
 }
 
 .team-card:hover::before {
-  background-color: var(--secondary);
-  opacity: 0.8;
+  background-color: var(--color-accent);
+  opacity: 0.9;
 }
 
-/* Estado de Save Seleccionado */
 .team-card.active-save {
-  border-color: var(--primary);
-  box-shadow: 0 16px 30px -10px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 230, 118, 0.12);
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-glow), var(--shadow-md);
 }
 
 .team-card.active-save::before {
-  background-color: var(--primary);
+  background-color: var(--color-accent);
   width: 6px;
   opacity: 1;
 }
 
 .team-card-header {
-  margin-bottom: 1.25rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  margin-bottom: 1rem;
 }
 
 .team-card-title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #ffffff;
+  font-size: 1.45rem;
+  color: #FFFFFF;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 90%;
+  max-width: 80%;
 }
 
 .active-save-badge {
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--bg-primary);
-  background-color: var(--primary);
-  padding: 0.15rem 0.5rem;
+  color: var(--color-bg-base);
+  background-color: var(--color-accent);
+  padding: 0.2rem 0.5rem;
   border-radius: 4px;
   text-transform: uppercase;
+  font-family: var(--font-display);
 }
 
-/* Stats Rápidas */
 .team-stats {
   display: flex;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  gap: 1.75rem;
+  margin-bottom: 1.25rem;
 }
 
 .stat-item {
@@ -413,18 +511,19 @@ select.form-control {
 
 .stat-label {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-weight: 500;
 }
 
 .stat-value {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
+  font-family: var(--font-display);
   font-weight: 700;
-  color: var(--text-main);
+  color: #FFFFFF;
 }
 
-/* Acciones de la Tarjeta */
 .team-actions {
   display: flex;
   justify-content: space-between;
@@ -438,13 +537,26 @@ select.form-control {
   gap: 0.5rem;
 }
 
-/* Estado de Vacío (Empty State) */
+.team-actions .btn {
+  min-height: 38px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.team-actions .btn-icon {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  padding: 0;
+}
+
+/* empty state */
 .empty-state {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 4rem 2rem;
-  background-color: rgba(13, 17, 27, 0.4);
-  border: 1.5px dashed var(--border-color);
+  padding: 4.5rem 2rem;
+  background-color: rgba(22, 22, 22, 0.4);
+  border: 1.5px dashed var(--color-border);
   border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
@@ -454,39 +566,730 @@ select.form-control {
 
 .empty-state-icon {
   font-size: 3rem;
-  color: var(--text-muted);
+  color: var(--color-text-secondary);
+  opacity: 0.4;
 }
 
 .empty-state-title {
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1.3rem;
+  color: #FFFFFF;
 }
 
 .empty-state-text {
-  color: var(--text-muted);
+  color: var(--color-text-secondary);
   font-size: 0.95rem;
   max-width: 400px;
-  font-weight: 300;
-}
-
-/* Pie de Página Tono Humano */
-.app-footer {
-  text-align: center;
-  color: var(--text-muted);
-  margin-top: 5rem;
-  padding: 2.5rem 0;
-  border-top: 1px solid var(--border-color);
-  font-size: 0.85rem;
-  font-weight: 300;
-  letter-spacing: 0.3px;
-}
-
-.app-footer p {
-  opacity: 0.8;
 }
 
 /* ==========================================
-   4. Modales / Cuadros de Diálogo Personalizados
+   8. TABBED NAVIGATION SYSTEM
+   ========================================== */
+.team-header-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+  gap: 1.5rem;
+}
+
+.team-info-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.team-info-left #btn-volver-dashboard {
+  align-self: flex-start;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  min-height: 34px;
+}
+
+.team-view-title {
+  font-size: 2rem;
+  color: #FFFFFF;
+  margin-top: 0.25rem;
+}
+
+.team-info-stats {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.stat-bubble {
+  background-color: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100px;
+}
+
+.bubble-label {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.bubble-val {
+  font-size: 1.5rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.tabs-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0px;
+}
+
+.tab-btn {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition-fast);
+  padding-bottom: 0.75rem;
+}
+
+.tab-btn:hover {
+  color: #FFFFFF;
+}
+
+.tab-btn.active {
+  color: var(--color-accent);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--color-accent);
+  border-radius: 2px 2px 0 0;
+}
+
+@media (max-width: 768px) {
+  .team-header-panel {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1.25rem 1.5rem;
+  }
+  .team-info-stats {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+  .stat-bubble {
+    min-width: 0;
+    padding: 0.5rem;
+  }
+  .tabs-nav {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tab-btn {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+}
+
+/* ==========================================
+   9. RESUMEN TÁCTICO DE POSICIONES Y FILTROS (TACTICAL POSITIONS PANEL)
+   ========================================== */
+.squad-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.squad-list-header h3 {
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.positions-summary-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  background-color: rgba(22, 22, 22, 0.45);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.tactical-line-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  padding-bottom: 0.6rem;
+}
+
+.tactical-line-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.tactical-line-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  width: 95px;
+  min-width: 95px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.tactical-badges-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  flex: 1;
+}
+
+.pos-summary-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  user-select: none;
+  transition: var(--transition-fast);
+}
+
+.pos-summary-card:hover {
+  border-color: var(--color-text-secondary);
+  background-color: var(--color-border);
+}
+
+.pos-summary-card.active {
+  background-color: rgba(0, 255, 135, 0.1);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.pos-summary-card.zero-count {
+  opacity: 0.35;
+}
+
+.pos-summary-card .badge-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.07);
+  color: var(--color-text-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  transition: var(--transition-fast);
+}
+
+.pos-summary-card.active .badge-count {
+  background-color: var(--color-accent);
+  color: var(--color-bg-base);
+}
+
+@media (max-width: 768px) {
+  .tactical-line-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    padding-bottom: 0.75rem;
+  }
+  .tactical-line-label {
+    width: auto;
+    min-width: auto;
+    font-size: 0.75rem;
+  }
+}
+
+/* ==========================================
+   10. PLAYER LISTS (PLAYERS CARD & TABLE VIEW)
+   ========================================== */
+.squad-workspace {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.panel-card {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.panel-card h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.squad-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.squad-table th, .squad-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.squad-table th {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.squad-table tbody tr {
+  transition: var(--transition-fast);
+}
+
+.squad-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.player-position-badge {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  background-color: rgba(0, 255, 135, 0.1);
+  color: var(--color-accent);
+  margin-right: 0.25rem;
+  margin-bottom: 0.25rem;
+  border: 1px solid rgba(0, 255, 135, 0.2);
+}
+
+.player-status-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.25rem 0.65rem;
+  border-radius: 30px;
+}
+
+.status-titular {
+  background-color: rgba(0, 255, 135, 0.15);
+  color: var(--color-accent);
+  border: 1.5px solid rgba(0, 255, 135, 0.25);
+}
+
+.status-suplente {
+  background-color: rgba(255, 176, 32, 0.15);
+  color: var(--color-warning);
+  border: 1.5px solid rgba(255, 176, 32, 0.25);
+}
+
+.status-rotacion {
+  background-color: rgba(138, 138, 138, 0.15);
+  color: var(--color-text-secondary);
+  border: 1.5px solid rgba(138, 138, 138, 0.25);
+}
+
+.player-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.player-actions .btn {
+  padding: 0;
+  width: 38px;
+  height: 38px;
+  min-height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+}
+
+.placeholder-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4.5rem 2rem;
+  background-color: rgba(0, 0, 0, 0.1);
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  min-height: 250px;
+  gap: 1rem;
+}
+
+.placeholder-panel-icon {
+  font-size: 3rem;
+  color: var(--color-text-secondary);
+  opacity: 0.35;
+}
+
+.placeholder-panel h3 {
+  font-size: 1.3rem;
+  color: #FFFFFF;
+}
+
+.placeholder-panel p {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  max-width: 400px;
+}
+
+/* Conversión de Tablas a Tarjetas en Mobile (<768px) */
+@media (max-width: 768px) {
+  #tab-plantilla .squad-table thead {
+    display: none;
+  }
+  #tab-plantilla .squad-table, 
+  #tab-plantilla .squad-table tbody, 
+  #tab-plantilla .squad-table tr {
+    display: block;
+    width: 100%;
+  }
+  #tab-plantilla .squad-table tr {
+    background-color: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 1.25rem;
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+  }
+  #tab-plantilla .squad-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    text-align: left !important;
+  }
+  #tab-plantilla .squad-table td:last-child {
+    border-bottom: none;
+    justify-content: flex-end;
+    padding-top: 0.75rem;
+  }
+  #tab-plantilla .squad-table td::before {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  #tab-plantilla .squad-table td:nth-child(1)::before { content: "Dorsal"; }
+  #tab-plantilla .squad-table td:nth-child(2)::before { content: "Jugador"; }
+  #tab-plantilla .squad-table td:nth-child(3)::before { content: "Posiciones"; }
+  #tab-plantilla .squad-table td:nth-child(4)::before { content: "Edad"; }
+  #tab-plantilla .squad-table td:nth-child(5)::before { content: "Valoración"; }
+  #tab-plantilla .squad-table td:nth-child(6)::before { content: "Valor de Mercado"; }
+  #tab-plantilla .squad-table td:nth-child(7)::before { content: "Estado"; }
+  #tab-plantilla .squad-table td:nth-child(8)::before { content: "Acciones"; }
+}
+
+/* ==========================================
+   11. WISHLIST & TRANSFERS (WISHLIST TABLE VIEW & CARD VIEW)
+   ========================================== */
+.priority-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.25rem 0.65rem;
+  border-radius: 4px;
+}
+
+.priority-alta {
+  background-color: rgba(255, 77, 77, 0.15);
+  color: var(--color-danger);
+  border: 1px solid rgba(255, 77, 77, 0.25);
+}
+
+.priority-media {
+  background-color: rgba(255, 176, 32, 0.15);
+  color: var(--color-warning);
+  border: 1px solid rgba(255, 176, 32, 0.25);
+}
+
+.priority-baja {
+  background-color: rgba(0, 255, 135, 0.15);
+  color: var(--color-accent);
+  border: 1px solid rgba(0, 255, 135, 0.25);
+}
+
+.status-fichaje-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.25rem 0.65rem;
+  border-radius: 30px;
+}
+
+.status-fichaje-pendiente {
+  background-color: rgba(138, 138, 138, 0.15);
+  color: var(--color-text-secondary);
+  border: 1.5px solid rgba(138, 138, 138, 0.25);
+}
+
+.status-fichaje-negociacion {
+  background-color: rgba(255, 176, 32, 0.15);
+  color: var(--color-warning);
+  border: 1.5px solid rgba(255, 176, 32, 0.25);
+}
+
+.status-fichaje-fichado {
+  background-color: rgba(0, 255, 135, 0.15);
+  color: var(--color-accent);
+  border: 1.5px solid rgba(0, 255, 135, 0.25);
+}
+
+.status-fichaje-descartado {
+  background-color: rgba(255, 77, 77, 0.15);
+  color: var(--color-danger);
+  border: 1.5px solid rgba(255, 77, 77, 0.25);
+}
+
+/* Fichajes buscador y filtros */
+.fichajes-filters-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.fichajes-filters-row .form-control {
+  flex: 1;
+  min-width: 150px;
+}
+
+/* Conversión de Tablas a Tarjetas en Mobile (<768px) */
+@media (max-width: 768px) {
+  #tab-fichajes .squad-table thead {
+    display: none;
+  }
+  #tab-fichajes .squad-table, 
+  #tab-fichajes .squad-table tbody, 
+  #tab-fichajes .squad-table tr {
+    display: block;
+    width: 100%;
+  }
+  #tab-fichajes .squad-table tr {
+    background-color: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 1.25rem;
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+  }
+  #tab-fichajes .squad-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    text-align: left !important;
+  }
+  #tab-fichajes .squad-table td:last-child {
+    border-bottom: none;
+    justify-content: flex-end;
+    padding-top: 0.75rem;
+  }
+  #tab-fichajes .squad-table td::before {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  #tab-fichajes .squad-table td:nth-child(1)::before { content: "Fichaje"; }
+  #tab-fichajes .squad-table td:nth-child(2)::before { content: "Club Actual"; }
+  #tab-fichajes .squad-table td:nth-child(3)::before { content: "Posiciones"; }
+  #tab-fichajes .squad-table td:nth-child(4)::before { content: "Edad"; }
+  #tab-fichajes .squad-table td:nth-child(5)::before { content: "OVR"; }
+  #tab-fichajes .squad-table td:nth-child(6)::before { content: "POT"; }
+  #tab-fichajes .squad-table td:nth-child(7)::before { content: "Valor Estimado"; }
+  #tab-fichajes .squad-table td:nth-child(8)::before { content: "Prioridad"; }
+  #tab-fichajes .squad-table td:nth-child(9)::before { content: "Estado"; }
+  #tab-fichajes .squad-table td:nth-child(10)::before { content: "Acciones"; }
+}
+
+/* ==========================================
+   12. GENERAL INFO & BITÁCORA TIMELINE
+   ========================================== */
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rule-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 0.5rem;
+}
+
+.rule-item:last-child {
+  margin-bottom: 0;
+}
+
+.rule-text {
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.rule-text::before {
+  content: '✓';
+  color: var(--color-accent);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.notes-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  padding-left: 1.5rem;
+  margin-top: 1rem;
+}
+
+/* Timeline Vertical Line Connector */
+.notes-feed::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 4px;
+  width: 2px;
+  background-color: var(--color-border);
+}
+
+.note-card {
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Bullet del Timeline */
+.note-card::before {
+  content: '';
+  position: absolute;
+  top: 1.2rem;
+  left: -1.75rem;
+  width: 10px;
+  height: 10px;
+  background-color: var(--color-accent);
+  border: 3px solid var(--color-bg-base);
+  border-radius: 50%;
+  z-index: 5;
+}
+
+.note-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.note-date {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--color-accent);
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.note-text {
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.info-general-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 992px) {
+  .info-general-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================
+   13. POPUPS & MODALS OVERLAYS (MODALS, OVERLAYS, CUSTOM TOASTS & ALERTS)
    ========================================== */
 .modal-overlay {
   position: fixed;
@@ -494,16 +1297,16 @@ select.form-control {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(7, 9, 14, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(5, 5, 5, 0.85);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.25s ease;
 }
 
 .modal-overlay.active {
@@ -512,25 +1315,29 @@ select.form-control {
 }
 
 .modal-content {
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 2rem;
   width: 90%;
-  max-width: 480px;
+  max-width: 500px;
   box-shadow: var(--shadow-lg);
-  transform: translateY(20px);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scale(0.95);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .modal-overlay.active .modal-content {
-  transform: translateY(0);
+  transform: scale(1);
 }
 
 .modal-title {
-  font-size: 1.35rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  color: #FFFFFF;
 }
 
 .modal-body {
@@ -543,228 +1350,45 @@ select.form-control {
   gap: 0.75rem;
 }
 
-/* ==========================================
-   5. Estilos de Vista de Detalles de Equipo (Fase 3)
-   ========================================== */
-
-/* Panel de Cabecera del Equipo */
-.team-header-panel {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(135deg, rgba(16, 22, 38, 0.85) 0%, rgba(8, 12, 22, 0.9) 100%);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem 2rem;
-  margin-bottom: 2rem;
-}
-
-.team-info-left {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.team-info-left #btn-volver-dashboard {
-  align-self: flex-start;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.85rem;
-}
-
-.team-view-title {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: #ffffff;
-}
-
-.team-info-stats {
-  display: flex;
-  gap: 1rem;
-}
-
-.stat-bubble {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 0.75rem 1.25rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 90px;
-}
-
-.bubble-label {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  font-weight: 600;
-}
-
-.bubble-val {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--primary);
-}
-
-/* Barra de Pestañas (Tabs Nav) */
-.tabs-nav {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 0.5rem;
-}
-
-.tab-btn {
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 0.75rem 1.5rem;
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  position: relative;
-  transition: var(--transition-all);
-}
-
-.tab-btn:hover {
-  color: #ffffff;
-}
-
-.tab-btn.active {
-  color: var(--primary);
-}
-
-.tab-btn.active::after {
-  content: '';
-  position: absolute;
-  bottom: -0.6rem;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background-color: var(--primary);
-  border-radius: 2px;
-}
-
-/* Controladores de Paneles */
-.tab-panel {
+/* Formularios Modales */
+#tab-plantilla .squad-form-container,
+#tab-fichajes .squad-form-container {
   display: none;
 }
 
-.tab-panel.active {
-  display: block;
-}
-
-/* Workspace de la Plantilla (Columnas) */
-.squad-workspace {
-  display: grid;
-  grid-template-columns: 390px 1fr;
-  gap: 1.5rem;
-  align-items: stretch;
-}
-
-.squad-workspace > div {
+#tab-plantilla .squad-form-container.active,
+#tab-fichajes .squad-form-container.active {
   display: flex;
-  flex-direction: column;
-}
-
-.squad-workspace > div > .panel-card {
-  flex: 1;
-}
-
-.panel-card {
-  background-color: var(--bg-card);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(5, 5, 5, 0.85);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  box-shadow: var(--shadow-lg);
-}
-
-.panel-card h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.squad-list-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.squad-list-header h3 {
-  border-bottom: none !important;
-  margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-/* Contenedor de Resumen por Posición */
-.positions-summary-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.25rem;
-}
-
-.pos-summary-card {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 0.35rem 0.7rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  cursor: pointer;
-  user-select: none;
-  transition: var(--transition-all);
-}
-
-.pos-summary-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.04);
-}
-
-.pos-summary-card.active {
-  background-color: var(--primary-glow);
-  border-color: var(--primary);
-  color: var(--primary);
-  box-shadow: 0 0 10px rgba(0, 230, 118, 0.15);
-}
-
-.pos-summary-card .badge-count {
-  display: inline-flex;
-  align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.06);
-  color: var(--text-main);
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
-  transition: var(--transition-all);
+  align-items: center;
+  z-index: 999;
 }
 
-.pos-summary-card.active .badge-count {
-  background-color: var(--primary);
-  color: var(--bg-primary);
+#tab-plantilla .squad-form-container.active > .panel-card,
+#tab-fichajes .squad-form-container.active > .panel-card {
+  width: 90%;
+  max-width: 520px;
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Formulario de Jugadores */
+@keyframes modalIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
 .form-field {
   display: flex;
   flex-direction: column;
@@ -775,7 +1399,9 @@ select.form-control {
 .form-field label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text-main);
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .form-grid-2 {
@@ -799,336 +1425,94 @@ select.form-control {
 
 .form-actions-row .btn {
   width: 100%;
-  justify-content: center;
 }
 
-/* Grid de Checkboxes de Posiciones */
 .positions-checkbox-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.5rem;
-  background-color: rgba(13, 17, 27, 0.6);
-  border: 1px solid var(--border-color);
+  background-color: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: 0.75rem;
-  max-height: 140px;
+  max-height: 130px;
   overflow-y: auto;
 }
 
 .cb-label {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   font-size: 0.8rem;
-  color: var(--text-muted);
+  color: var(--color-text-secondary);
   cursor: pointer;
   user-select: none;
 }
 
 .cb-label:hover {
-  color: #ffffff;
+  color: #FFFFFF;
 }
 
 .cb-label input[type="checkbox"] {
-  accent-color: var(--primary);
+  accent-color: var(--color-accent);
   cursor: pointer;
 }
 
-/* Tabla de Jugadores */
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.squad-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  font-size: 0.95rem;
-}
-
-.squad-table th, .squad-table td {
-  padding: 0.9rem 1rem;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.squad-table th {
-  color: var(--text-muted);
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.5px;
-  background-color: rgba(255, 255, 255, 0.01);
-}
-
-.squad-table tbody tr {
-  transition: var(--transition-all);
-}
-
-.squad-table tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.02);
-}
-
-.player-position-badge {
-  display: inline-block;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.15rem 0.45rem;
-  border-radius: 4px;
-  background-color: rgba(24, 255, 255, 0.1);
-  color: var(--secondary);
-  margin-right: 0.25rem;
-  margin-bottom: 0.25rem;
-}
-
-.player-status-badge {
-  display: inline-block;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.25rem 0.6rem;
-  border-radius: 30px;
-}
-
-.status-titular {
-  background-color: rgba(0, 230, 118, 0.1);
-  color: var(--primary);
-}
-
-.status-suplente {
-  background-color: rgba(255, 170, 0, 0.1);
-  color: var(--accent);
-}
-
-.status-rotacion {
-  background-color: rgba(24, 255, 255, 0.1);
-  color: var(--secondary);
-}
-
-/* Badges de Fichajes */
-.priority-badge {
-  display: inline-block;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.25rem 0.6rem;
-  border-radius: 4px;
-}
-
-.priority-alta {
-  background-color: rgba(255, 82, 82, 0.1);
-  color: var(--danger);
-  border: 1px solid rgba(255, 82, 82, 0.2);
-}
-
-.priority-media {
-  background-color: rgba(255, 170, 0, 0.1);
-  color: var(--accent);
-  border: 1px solid rgba(255, 170, 0, 0.2);
-}
-
-.priority-baja {
-  background-color: rgba(24, 255, 255, 0.1);
-  color: var(--secondary);
-  border: 1px solid rgba(24, 255, 255, 0.2);
-}
-
-.status-fichaje-badge {
-  display: inline-block;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.25rem 0.6rem;
-  border-radius: 30px;
-}
-
-.status-fichaje-pendiente {
-  background-color: rgba(255, 255, 255, 0.04);
-  color: var(--text-muted);
-  border: 1px solid var(--border-color);
-}
-
-.status-fichaje-negociacion {
-  background-color: rgba(255, 170, 0, 0.1);
-  color: var(--accent);
-  border: 1px solid rgba(255, 170, 0, 0.2);
-}
-
-.status-fichaje-fichado {
-  background-color: rgba(0, 230, 118, 0.1);
-  color: var(--primary);
-  border: 1px solid rgba(0, 230, 118, 0.2);
-}
-
-.status-fichaje-descartado {
-  background-color: rgba(255, 82, 82, 0.1);
-  color: var(--danger);
-  border: 1px solid rgba(255, 82, 82, 0.2);
-}
-
-.player-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.4rem;
-}
-
-.player-actions .btn {
-  padding: 0.4rem;
-  font-size: 0.8rem;
-}
-
-/* Panel de Placeholder (Tabs Próximamente) */
-.placeholder-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 5rem 2rem;
-  background-color: var(--bg-card);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  min-height: 350px;
-  gap: 1rem;
-}
-
-.placeholder-panel-icon {
-  color: var(--text-muted);
-  opacity: 0.4;
-  margin-bottom: 0.5rem;
-}
-
-.placeholder-panel h3 {
-  font-size: 1.35rem;
-  font-weight: 700;
-}
-
-.placeholder-panel p {
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  max-width: 420px;
-  font-weight: 300;
-}
-
-/* ==========================================
-   6. Adaptación Móvil de Nuevas Secciones
-   ========================================== */
-@media (max-width: 992px) {
-  .squad-workspace {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .team-header-panel {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1.5rem;
-    padding: 1.25rem 1.5rem;
-  }
-
-  .team-info-stats {
-    justify-content: space-between;
-  }
-
-  .stat-bubble {
-    flex: 1;
-  }
-
-  .tabs-nav {
-    overflow-x: auto;
-    white-space: nowrap;
-    gap: 0.25rem;
-  }
-
-  .tab-btn {
-    padding: 0.75rem 1rem;
-    font-size: 0.95rem;
-  }
-
+@media (max-width: 576px) {
   .positions-checkbox-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+  .form-grid-2, .form-grid-3 {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 }
 
-/* ==========================================
-   7. Estilos de pestaña Información General
-   ========================================== */
-.rules-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.rule-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.65rem 0.5rem;
-  border-bottom: 1px solid var(--border-color);
-  gap: 1rem;
-}
-
-.rule-item:last-child {
-  border-bottom: none;
-}
-
-.rule-text {
-  font-size: 0.9rem;
-  color: #ffffff;
-  line-height: 1.4;
-}
-
-.notes-feed {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-height: 400px;
-  overflow-y: auto;
-  padding-right: 0.25rem;
-}
-
-.notes-feed::-webkit-scrollbar {
-  width: 6px;
-}
-
-.notes-feed::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.notes-feed::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 3px;
-}
-
-.note-card {
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border-color);
+/* Notificación Toasts */
+.custom-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background-color: var(--color-bg-surface);
+  border: 1.5px solid var(--color-accent);
   border-radius: var(--radius-md);
-  padding: 0.85rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  padding: 0.85rem 1.5rem;
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  z-index: 1100;
+  transform: translateY(80px) scale(0.9);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+  pointer-events: none;
 }
 
-.note-card-header {
+.custom-toast.show {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.toast-content {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-}
-
-.note-date {
-  font-size: 0.75rem;
+  gap: 0.75rem;
+  font-family: var(--font-display);
   font-weight: 700;
-  color: var(--primary);
-  letter-spacing: 0.05em;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
 }
 
-.note-text {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  line-height: 1.4;
-  white-space: pre-wrap;
+.toast-icon {
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+@media (max-width: 576px) {
+  .custom-toast {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1.5rem;
+    padding: 0.75rem 1rem;
+  }
 }

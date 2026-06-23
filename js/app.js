@@ -21,17 +21,17 @@ function formatearMonedaCompacta(valor) {
   return `€${valor}`;
 }
 
-/**
- * Renderiza los badges de posiciones con sus respectivos contadores de forma genérica.
- * @param {Array} items - Listado de jugadores o fichajes.
- * @param {HTMLElement} container - Contenedor en el DOM.
- * @param {string|null} filtroActivo - Filtro de posición seleccionado.
- * @param {Function} callback - Acción a ejecutar tras el click (pasa la posición clickeada o null).
- */
 function renderizarBadgesPosicion(items, container, filtroActivo, callback) {
-  const posicionesFifa = ["GK", "CB", "LB", "RB", "LWB", "RWB", "CDM", "CM", "CAM", "LM", "RM", "LW", "RW", "ST", "CF"];
+  const lineasTacticas = [
+    { label: "PORTERÍA", pos: ["GK"] },
+    { label: "DEFENSA", pos: ["CB", "LB", "RB", "LWB", "RWB"] },
+    { label: "MEDIOCAMPO", pos: ["CDM", "CM", "CAM", "LM", "RM"] },
+    { label: "DELANTERA", pos: ["LW", "RW", "ST", "CF"] }
+  ];
+
   const counts = {};
-  posicionesFifa.forEach(pos => counts[pos] = 0);
+  const todasPosiciones = ["GK", "CB", "LB", "RB", "LWB", "RWB", "CDM", "CM", "CAM", "LM", "RM", "LW", "RW", "ST", "CF"];
+  todasPosiciones.forEach(pos => counts[pos] = 0);
 
   items.forEach(item => {
     if (Array.isArray(item.posiciones)) {
@@ -42,20 +42,36 @@ function renderizarBadgesPosicion(items, container, filtroActivo, callback) {
   });
 
   container.innerHTML = "";
-  posicionesFifa.forEach(pos => {
-    const count = counts[pos];
-    const esActivo = pos === filtroActivo;
-
-    const badge = document.createElement("div");
-    badge.className = `pos-summary-card ${esActivo ? "active" : ""}`;
-    badge.innerHTML = `${pos} <span class="badge-count">${count}</span>`;
-
-    badge.addEventListener("click", () => {
-      const nuevoFiltro = (filtroActivo === pos) ? null : pos;
-      callback(nuevoFiltro);
+  lineasTacticas.forEach(linea => {
+    const row = document.createElement("div");
+    row.className = "tactical-line-row";
+    
+    const label = document.createElement("span");
+    label.className = "tactical-line-label";
+    label.textContent = linea.label;
+    
+    const badgesContainer = document.createElement("div");
+    badgesContainer.className = "tactical-badges-container";
+    
+    linea.pos.forEach(pos => {
+      const count = counts[pos];
+      const esActivo = pos === filtroActivo;
+      
+      const badge = document.createElement("div");
+      badge.className = `pos-summary-card ${esActivo ? "active" : ""} ${count === 0 ? "zero-count" : ""}`;
+      badge.innerHTML = `${pos} <span class="badge-count">${count}</span>`;
+      
+      badge.addEventListener("click", () => {
+        const nuevoFiltro = (filtroActivo === pos) ? null : pos;
+        callback(nuevoFiltro);
+      });
+      
+      badgesContainer.appendChild(badge);
     });
-
-    container.appendChild(badge);
+    
+    row.appendChild(label);
+    row.appendChild(badgesContainer);
+    container.appendChild(row);
   });
 }
 
@@ -168,28 +184,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const editNombreInput = document.getElementById("edit-equipo-nombre");
   const btnCancelarEdit = document.getElementById("btn-cancelar-edit");
 
-  // Modal Eliminar Equipo
+  // Modal Confirmación Único (Reutilizable)
   const confirmModal = document.getElementById("confirm-modal");
-  const deleteIdInput = document.getElementById("delete-equipo-id");
-  const deleteNombreDisplay = document.getElementById("delete-equipo-nombre");
-  const btnCancelarDelete = document.getElementById("btn-cancelar-delete");
-  const btnConfirmarDelete = document.getElementById("btn-confirmar-delete");
+  const confirmTitle = document.getElementById("confirm-modal-title");
+  const confirmMessage = document.getElementById("confirm-modal-message");
+  const confirmSubmessage = document.getElementById("confirm-modal-submessage");
+  const confirmPreview = document.getElementById("confirm-modal-preview");
+  const deleteItemType = document.getElementById("delete-item-type");
+  const deleteItemId = document.getElementById("delete-item-id");
+  const deleteItemExtraId = document.getElementById("delete-item-extra-id");
+  const btnConfirmCancel = document.getElementById("btn-confirm-cancel");
+  const btnConfirmAccept = document.getElementById("btn-confirm-accept");
 
-  // Modal Eliminar Jugador
-  const confirmJugadorModal = document.getElementById("confirm-jugador-modal");
-  const deleteJugadorIdInput = document.getElementById("delete-jugador-id");
-  const deleteJugadorEquipoIdInput = document.getElementById("delete-jugador-equipo-id");
-  const deleteJugadorNombreDisplay = document.getElementById("delete-jugador-nombre");
-  const btnCancelarDeleteJugador = document.getElementById("btn-cancelar-delete-jugador");
-  const btnConfirmarDeleteJugador = document.getElementById("btn-confirmar-delete-jugador");
+  // Modal Alerta Único (Reutilizable)
+  const alertModal = document.getElementById("alert-modal");
+  const alertTitle = document.getElementById("alert-modal-title");
+  const alertMessage = document.getElementById("alert-modal-message");
+  const btnAlertClose = document.getElementById("btn-alert-close");
 
-  // Modal Eliminar Fichaje
-  const confirmFichajeModal = document.getElementById("confirm-fichaje-modal");
-  const deleteFichajeIdInput = document.getElementById("delete-fichaje-id");
-  const deleteFichajeEquipoIdInput = document.getElementById("delete-fichaje-equipo-id");
-  const deleteFichajeNombreDisplay = document.getElementById("delete-fichaje-nombre");
-  const btnCancelarDeleteFichaje = document.getElementById("btn-cancelar-delete-fichaje");
-  const btnConfirmarDeleteFichaje = document.getElementById("btn-confirmar-delete-fichaje");
+  // Botones de apertura de formularios modales
+  const btnAbrirFormJugador = document.getElementById("btn-abrir-form-jugador");
+  const btnAbrirFormFichaje = document.getElementById("btn-abrir-form-fichaje");
+  const containerFormJugador = document.querySelector("#tab-plantilla .squad-form-container");
+  const containerFormFichaje = document.querySelector("#tab-fichajes .squad-form-container");
 
   // Elementos DOM de Información General y Bitácora
   const formInfoGeneral = document.getElementById("form-info-general");
@@ -207,13 +224,68 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputNuevaNotaTexto = document.getElementById("nueva-nota-texto");
   const feedNotas = document.getElementById("feed-notas");
 
-  // Modal Delete Nota
-  const confirmNotaModal = document.getElementById("confirm-nota-modal");
-  const deleteNotaIndexInput = document.getElementById("delete-nota-index");
-  const deleteNotaEquipoIdInput = document.getElementById("delete-nota-equipo-id");
-  const deleteNotaPreviewDisplay = document.getElementById("delete-nota-preview");
-  const btnCancelarDeleteNota = document.getElementById("btn-cancelar-delete-nota");
-  const btnConfirmarDeleteNota = document.getElementById("btn-confirmar-delete-nota");
+  // ==========================================
+  // SISTEMA DE FEEDBACK: ALERTA Y TOAST PERSONALIZADOS
+  // ==========================================
+
+  /**
+   * Muestra un modal de alerta premium no bloqueante.
+   * @param {string} mensaje - El texto de la alerta.
+   * @param {string} titulo - El título del modal.
+   */
+  function mostrarAlerta(mensaje, titulo = "Atención") {
+    alertTitle.textContent = titulo;
+    alertMessage.innerHTML = mensaje.replace(/\n/g, "<br>");
+    alertModal.classList.add("active");
+  }
+
+  // Sobrescribir window.alert nativo
+  window.alert = function(mensaje) {
+    mostrarAlerta(mensaje, "Atención");
+  };
+
+  // Event listener para cerrar el modal de alerta
+  if (btnAlertClose) {
+    btnAlertClose.addEventListener("click", () => {
+      alertModal.classList.remove("active");
+    });
+  }
+  if (alertModal) {
+    alertModal.addEventListener("click", (e) => {
+      if (e.target === alertModal) {
+        alertModal.classList.remove("active");
+      }
+    });
+  }
+
+  /**
+   * Muestra una notificación toast efímera en la esquina inferior derecha.
+   * @param {string} mensaje - El texto a mostrar.
+   */
+  function mostrarToast(mensaje) {
+    // Si ya existe un toast anterior, lo removemos de inmediato
+    const prevToast = document.querySelector(".custom-toast");
+    if (prevToast) prevToast.remove();
+
+    const toast = document.createElement("div");
+    toast.className = "custom-toast";
+    toast.innerHTML = `
+      <div class="toast-content">
+        <svg class="toast-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>${mensaje}</span>
+      </div>
+    `;
+    document.body.appendChild(toast);
+    
+    // Animar entrada
+    setTimeout(() => toast.classList.add("show"), 10);
+    
+    // Quitar después de 3 segundos
+    setTimeout(() => {
+      toast.classList.remove("show");
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
 
   // ==========================================
   // 1. CONTROL DE NAVEGACIÓN Y TABS
@@ -557,7 +629,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       tr.querySelector(".btn-eliminar-jugador").addEventListener("click", () => {
-        abrirModalEliminarJugador(jugador.id, jugador.nombre);
+        abrirModalConfirmacion("player", jugador.id, currentOpenTeamId, "¿Eliminar Jugador?", `¿Estás seguro de que deseas eliminar a <strong>${jugador.nombre}</strong> de la plantilla?`);
       });
 
       plantillaTbody.appendChild(tr);
@@ -576,6 +648,11 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Desmarcar checkboxes
     checkboxesPosicion.forEach(cb => cb.checked = false);
+
+    // Cerrar el modal
+    if (containerFormJugador) {
+      containerFormJugador.classList.remove("active");
+    }
   }
 
   /**
@@ -604,8 +681,10 @@ document.addEventListener("DOMContentLoaded", () => {
       cb.checked = jugador.posiciones.includes(cb.value);
     });
 
-    // Hacer scroll al formulario
-    formJugador.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Abrir el modal
+    if (containerFormJugador) {
+      containerFormJugador.classList.add("active");
+    }
   }
 
   // Manejar el submit del formulario de jugador (Agregar/Editar)
@@ -643,9 +722,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (jugadorId) {
         // Modo Edición
         editarJugador(currentOpenTeamId, jugadorId, jugadorData);
+        mostrarToast("Jugador actualizado con éxito.");
       } else {
         // Modo Agregar
         agregarJugador(currentOpenTeamId, jugadorData);
+        mostrarToast("Jugador guardado con éxito.");
       }
 
       // Limpiar y renderizar
@@ -676,32 +757,37 @@ document.addEventListener("DOMContentLoaded", () => {
     editForm.reset();
   }
 
-  // Modal Confirmación Eliminar Equipo
-  function abrirModalConfirmacion(id, nombre) {
-    deleteIdInput.value = id;
-    deleteNombreDisplay.textContent = nombre;
+  // Modal de Confirmación Único (Reutilizable)
+  function abrirModalConfirmacion(type, id, extraId, title, message, submessage = "", previewText = "") {
+    deleteItemType.value = type;
+    deleteItemId.value = id;
+    deleteItemExtraId.value = extraId || "";
+    
+    confirmTitle.textContent = title;
+    confirmMessage.innerHTML = message;
+    
+    if (submessage) {
+      confirmSubmessage.innerHTML = submessage;
+      confirmSubmessage.style.display = "block";
+    } else {
+      confirmSubmessage.style.display = "none";
+    }
+    
+    if (previewText) {
+      confirmPreview.textContent = previewText;
+      confirmPreview.style.display = "block";
+    } else {
+      confirmPreview.style.display = "none";
+    }
+    
     confirmModal.classList.add("active");
   }
 
   function cerrarModalConfirmacion() {
     confirmModal.classList.remove("active");
-    deleteNombreDisplay.textContent = "";
-    deleteIdInput.value = "";
-  }
-
-  // Modal Confirmación Eliminar Jugador
-  function abrirModalEliminarJugador(id, nombre) {
-    deleteJugadorIdInput.value = id;
-    deleteJugadorEquipoIdInput.value = currentOpenTeamId;
-    deleteJugadorNombreDisplay.textContent = nombre;
-    confirmJugadorModal.classList.add("active");
-  }
-
-  function cerrarModalEliminarJugador() {
-    confirmJugadorModal.classList.remove("active");
-    deleteJugadorNombreDisplay.textContent = "";
-    deleteJugadorIdInput.value = "";
-    deleteJugadorEquipoIdInput.value = "";
+    deleteItemType.value = "";
+    deleteItemId.value = "";
+    deleteItemExtraId.value = "";
   }
 
   // ==========================================
@@ -721,6 +807,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderEquipos();
         // Abrir automáticamente el nuevo equipo para una mejor UX
         abrirVistaEquipo(nuevoClub.id);
+        mostrarToast(`Carrera iniciada con éxito para ${nuevoClub.nombre}.`);
       } catch (error) {
         alert(error.message);
       }
@@ -743,66 +830,89 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         renderEquipos();
+        mostrarToast("Nombre del club actualizado con éxito.");
       } catch (error) {
         alert(error.message);
       }
     }
   });
 
-  // Confirmar eliminación del equipo
-  btnConfirmarDelete.addEventListener("click", () => {
-    const id = deleteIdInput.value;
-    if (id) {
-      try {
+  // Confirmar acción única en el modal de confirmación
+  btnConfirmAccept.addEventListener("click", () => {
+    const type = deleteItemType.value;
+    const id = deleteItemId.value;
+    const extraId = deleteItemExtraId.value;
+
+    if (!type || !id) return;
+
+    try {
+      if (type === "team") {
         eliminarEquipo(id);
-        
         if (id === activeTeamId) {
           seleccionarEquipo(null);
         }
-        
         cerrarModalConfirmacion();
         renderEquipos();
-      } catch (error) {
-        alert(error.message);
-      }
-    }
-  });
-
-  // Confirmar eliminación de jugador
-  btnConfirmarDeleteJugador.addEventListener("click", () => {
-    const jugadorId = deleteJugadorIdInput.value;
-    const equipoId = deleteJugadorEquipoIdInput.value;
-    
-    if (jugadorId && equipoId) {
-      try {
-        eliminarJugador(equipoId, jugadorId);
-        cerrarModalEliminarJugador();
+        mostrarToast("Carrera eliminada con éxito.");
+      } else if (type === "player") {
+        eliminarJugador(extraId, id);
+        cerrarModalConfirmacion();
         renderPlantilla();
-      } catch (error) {
-        alert(error.message);
+        mostrarToast("Jugador eliminado con éxito.");
+      } else if (type === "fichaje") {
+        eliminarFichajeDeseado(extraId, id);
+        cerrarModalConfirmacion();
+        renderFichajes();
+        mostrarToast("Fichaje eliminado con éxito.");
+      } else if (type === "nota") {
+        const index = parseInt(id, 10);
+        const equipo = getEquipoById(extraId);
+        if (equipo) {
+          const info = equipo.infoGeneral || {};
+          const notas = [...(info.notas || [])];
+          notas.splice(index, 1);
+          actualizarInfoGeneral(extraId, { notas: notas });
+          cerrarModalConfirmacion();
+          renderInfoGeneral();
+          mostrarToast("Nota de bitácora eliminada con éxito.");
+        }
       }
+    } catch (error) {
+      alert(error.message);
     }
   });
 
-  // Cancelar modales
+  // Cancelar y cerrar modales
   btnCancelarEdit.addEventListener("click", cerrarModalRenombrar);
-  btnCancelarDelete.addEventListener("click", cerrarModalConfirmacion);
-  btnCancelarDeleteJugador.addEventListener("click", cerrarModalEliminarJugador);
-  btnCancelarDeleteFichaje.addEventListener("click", cerrarModalEliminarFichaje);
-  btnCancelarDeleteNota.addEventListener("click", cerrarModalEliminarNota);
+  btnConfirmCancel.addEventListener("click", cerrarModalConfirmacion);
 
-  // Cerrar modales haciendo click fuera del contenido
+  // Apertura de formularios modales
+  if (btnAbrirFormJugador) {
+    btnAbrirFormJugador.addEventListener("click", () => {
+      resetFormularioJugador();
+      containerFormJugador.classList.add("active");
+    });
+  }
+  if (btnAbrirFormFichaje) {
+    btnAbrirFormFichaje.addEventListener("click", () => {
+      resetFormularioFichaje();
+      containerFormFichaje.classList.add("active");
+    });
+  }
+
+  // Cerrar modales haciendo click fuera del contenido (en el overlay)
   window.addEventListener("click", (e) => {
     if (e.target === editModal) cerrarModalRenombrar();
     if (e.target === confirmModal) cerrarModalConfirmacion();
-    if (e.target === confirmJugadorModal) cerrarModalEliminarJugador();
-    if (e.target === confirmFichajeModal) cerrarModalEliminarFichaje();
-    if (e.target === confirmNotaModal) cerrarModalEliminarNota();
+    if (e.target === alertModal) alertModal.classList.remove("active");
+    if (e.target === containerFormJugador) resetFormularioJugador();
+    if (e.target === containerFormFichaje) resetFormularioFichaje();
   });
 
   // Exportar respaldo JSON
   btnExportar.addEventListener("click", () => {
     exportarStorageJSON();
+    mostrarToast("Respaldo .JSON descargado con éxito.");
   });
 
   // Limpiar filtro de posiciones
@@ -925,7 +1035,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       tr.querySelector(".btn-eliminar-fichaje").addEventListener("click", () => {
-        abrirModalEliminarFichaje(fichaje.id, fichaje.nombre);
+        abrirModalConfirmacion("fichaje", fichaje.id, currentOpenTeamId, "¿Eliminar Fichaje Deseado?", `¿Estás seguro de que deseas eliminar a <strong>${fichaje.nombre}</strong> de tu lista de seguimiento?`);
       });
 
       fichajesTbody.appendChild(tr);
@@ -942,6 +1052,11 @@ document.addEventListener("DOMContentLoaded", () => {
     btnCancelarFichaje.style.display = "none";
     btnGuardarFichaje.textContent = "Guardar Fichaje";
     checkboxesPosicionFichaje.forEach(cb => cb.checked = false);
+
+    // Cerrar el modal
+    if (containerFormFichaje) {
+      containerFormFichaje.classList.remove("active");
+    }
   }
 
   /**
@@ -967,22 +1082,10 @@ document.addEventListener("DOMContentLoaded", () => {
       cb.checked = fichaje.posiciones.includes(cb.value);
     });
 
-    formFichaje.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  // Modal Confirmación Eliminar Fichaje
-  function abrirModalEliminarFichaje(id, nombre) {
-    deleteFichajeIdInput.value = id;
-    deleteFichajeEquipoIdInput.value = currentOpenTeamId;
-    deleteFichajeNombreDisplay.textContent = nombre;
-    confirmFichajeModal.classList.add("active");
-  }
-
-  function cerrarModalEliminarFichaje() {
-    confirmFichajeModal.classList.remove("active");
-    deleteFichajeNombreDisplay.textContent = "";
-    deleteFichajeIdInput.value = "";
-    deleteFichajeEquipoIdInput.value = "";
+    // Abrir el modal
+    if (containerFormFichaje) {
+      containerFormFichaje.classList.add("active");
+    }
   }
 
   // Submit del formulario de fichaje
@@ -1017,8 +1120,10 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       if (fichajeId) {
         editarFichajeDeseado(currentOpenTeamId, fichajeId, fichajeData);
+        mostrarToast("Fichaje actualizado con éxito.");
       } else {
         agregarFichajeDeseado(currentOpenTeamId, fichajeData);
+        mostrarToast("Fichaje guardado con éxito.");
       }
 
       resetFormularioFichaje();
@@ -1029,22 +1134,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   btnCancelarFichaje.addEventListener("click", resetFormularioFichaje);
-
-  // Confirmar eliminación
-  btnConfirmarDeleteFichaje.addEventListener("click", () => {
-    const fichajeId = deleteFichajeIdInput.value;
-    const equipoId = deleteFichajeEquipoIdInput.value;
-    
-    if (fichajeId && equipoId) {
-      try {
-        eliminarFichajeDeseado(equipoId, fichajeId);
-        cerrarModalEliminarFichaje();
-        renderFichajes();
-      } catch (error) {
-        alert(error.message);
-      }
-    }
-  });
 
   // Filtros combinados de Fichajes
   selectFiltroFichajePrioridad.addEventListener("change", (e) => {
@@ -1163,7 +1252,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         card.querySelector(".btn-eliminar-nota").addEventListener("click", () => {
           const preview = card.querySelector(".btn-eliminar-nota").getAttribute("data-preview");
-          abrirModalEliminarNota(index, preview);
+          abrirModalConfirmacion("nota", index, currentOpenTeamId, "¿Eliminar nota de la bitácora?", "¿Estás seguro de que deseas eliminar esta nota permanentemente?", "", `"${preview}..."`);
         });
 
         feedNotas.appendChild(card);
@@ -1270,42 +1359,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Modal Confirmación Eliminar Nota
-  function abrirModalEliminarNota(index, preview) {
-    deleteNotaIndexInput.value = index;
-    deleteNotaEquipoIdInput.value = currentOpenTeamId;
-    deleteNotaPreviewDisplay.textContent = `"${preview}..."`;
-    confirmNotaModal.classList.add("active");
-  }
 
-  function cerrarModalEliminarNota() {
-    confirmNotaModal.classList.remove("active");
-    deleteNotaPreviewDisplay.textContent = "";
-    deleteNotaIndexInput.value = "";
-    deleteNotaEquipoIdInput.value = "";
-  }
-
-  btnConfirmarDeleteNota.addEventListener("click", () => {
-    const index = parseInt(deleteNotaIndexInput.value, 10);
-    const equipoId = deleteNotaEquipoIdInput.value;
-
-    if (!isNaN(index) && equipoId) {
-      const equipo = getEquipoById(equipoId);
-      if (equipo) {
-        const info = equipo.infoGeneral || {};
-        const notas = [...(info.notas || [])];
-        notas.splice(index, 1);
-
-        try {
-          actualizarInfoGeneral(equipoId, { notas: notas });
-          cerrarModalEliminarNota();
-          renderInfoGeneral();
-        } catch (error) {
-          alert(error.message);
-        }
-      }
-    }
-  });
 
   // ==========================================
   // LÓGICA DE IMPORTACIÓN Y EXPORTACIÓN CSV
@@ -1489,11 +1543,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       
-      let mensaje = `Importación de Plantilla completada.\n- Se importaron con éxito ${exitos} jugadores.`;
-      if (errores.length > 0) {
+      if (errores.length === 0) {
+        mostrarToast(`Importación completada. Se importaron ${exitos} jugadores.`);
+      } else {
+        let mensaje = `Importación de Plantilla completada.\n- Se importaron con éxito ${exitos} jugadores.`;
         mensaje += `\n- ${errores.length} filas fueron ignoradas por errores:\n` + errores.map(e => `  * ${e}`).join("\n");
+        mostrarAlerta(mensaje, "Resultado de Importación");
       }
-      alert(mensaje);
       
       inputPlantillaCsvImportar.value = "";
       
@@ -1643,11 +1699,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       
-      let mensaje = `Importación de Fichajes completada.\n- Se importaron con éxito ${exitos} fichajes.`;
-      if (errores.length > 0) {
+      if (errores.length === 0) {
+        mostrarToast(`Importación completada. Se importaron ${exitos} fichajes.`);
+      } else {
+        let mensaje = `Importación de Fichajes completada.\n- Se importaron con éxito ${exitos} fichajes.`;
         mensaje += `\n- ${errores.length} filas fueron ignoradas por errores:\n` + errores.map(e => `  * ${e}`).join("\n");
+        mostrarAlerta(mensaje, "Resultado de Importación");
       }
-      alert(mensaje);
       
       inputFichajeCsvImportar.value = "";
       
