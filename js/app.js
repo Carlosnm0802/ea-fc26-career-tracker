@@ -528,7 +528,7 @@ document.addEventListener("DOMContentLoaded", () => {
         e.stopPropagation();
         const id = e.currentTarget.getAttribute("data-id");
         const nombre = e.currentTarget.getAttribute("data-nombre");
-        abrirModalConfirmacion(id, nombre);
+        abrirModalConfirmacion("team", id, null, "¿Eliminar Carrera?", `¿Estás seguro de que deseas eliminar el club <strong>${nombre}</strong> y todos sus datos de plantilla, fichajes y notas?`);
       });
     });
   }

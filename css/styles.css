@@ -719,6 +719,14 @@ select.form-control {
   }
 }
 
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
 /* ==========================================
    9. RESUMEN TÁCTICO DE POSICIONES Y FILTROS (TACTICAL POSITIONS PANEL)
    ========================================== */
