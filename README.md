@@ -181,3 +181,8 @@ Este proyecto está optimizado para publicarse directamente en **GitHub Pages** 
 ## Autor
 
 Creado por [Carlos Nares](https://github.com/Carlosnm0802) para planificar partidas del Modo Carrera en EA FC 26.
+
+##Capturas de pantalla
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](image-2.png)
